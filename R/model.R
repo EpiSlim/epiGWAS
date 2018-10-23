@@ -2,7 +2,22 @@
 #'
 #'
 #'
-sample_SNP <- function(nX, nY, nZ12, clusters, MAF, thresh.MAF = 0.2, window.size = 3, overlap.marg = 0, overlap.inter = 0) {
+#'
+#' @param nX
+#' @param nY
+#' @param nZ12
+#' @param clusters
+#' @param MAF
+#' @param thresh.MAF
+#' @windo
+#'
+#'
+#'
+#'
+#'
+#'
+sample_SNP <- function(nX, nY, nZ12, clusters, MAF, thresh.MAF = 0.2,
+                       window.size = 3, overlap.marg = 0, overlap.inter = 0) {
   stopifnot(overlap.marg + overlap.inter < nX)
   active <- rep(NULL, 1 + nX + nY + 2 * nZ12 - (overlap.marg + overlap.inter))
 
@@ -39,22 +54,65 @@ sample_SNP <- function(nX, nY, nZ12, clusters, MAF, thresh.MAF = 0.2, window.siz
   return(list(
     target = active[1], syner = active[2:(nX + 1)],
     marginal = active[c((nX + 2):(nX + nY + 1 - overlap.marg), 1 + marg.idx)],
-    inter1 = active[c((nX + nY + 2):(nX + nY + nZ12 + 1 - overlap.inter) - overlap.marg, 1 + inter.idx)],
-    inter2 = active[((nX + nY + nZ12 + 2 - (overlap.marg + overlap.inter)):length(active))]
+    inter1 = active[c((nX + nY + 2):(nX + nY + nZ12 + 1 - overlap.inter) -
+                        overlap.marg, 1 + inter.idx)],
+    inter2 = active[((nX + nY + nZ12 + 2 - (overlap.marg + overlap.inter)):
+                       length(active))]
   ))
 }
 
-#' Generates a disease model for a list of causal SNPs
+#' Samples effect sizes for the disease model
 #'
-#' Normal distributions
+#' The generated disease model is the list of effect size coeffcients.
+#' The list comprises the following fields: "syner", "marg" and "inter".
+#' "syner" is itself a list of numeric vectors with two entries named
+#' "A0" and "A1". "A0" refers to the vector of effect sizes when the target
+#' variant \eqn{A = 0}{A = 0}. Similarly, "A1" refers to the vector of effect
+#' sizes in the case \eqn{A = 1}{A = 1}. The two other entries "marg" and
+#' "inter" are, respectively, the marginal and epistatic effect sizes. The
+#' effect sizes are independent and normally-distributed. The \code{mean}
+#' parameter is either a list of vectors or a vector of length 4. If
+#' \code{mean} is a vector, then the effet sizes for each type of effects are
+#' identically distributed. Otherwise, the corresponding vector in the list
+#' specifies their individual means. The same logic applies to \code{sd}, the
+#' standard deviation parameter. For coherence, the parameters \code{mean} and
+#' \code{sd} are encoded in the same order as the output.
+#'
+#' @param nX number of SNPs interacting with the target variant
+#' @param nY number of SNPs with marginal effects
+#' @param nZ12 nummber of SNP pairs with epistatic effects
+#' @param mean vector or list of means
+#' @param sd vector or list of standard deviations
+#'
+#' @return a list of vectors corresponding to the effect size coefficients.
 #'
 #' @export
 gen_model <- function(nX, nY, nZ12, mean = rep(0, 4), sd = rep(1, 4)) {
-  return(list(
-    syner = list(A0 = rnorm(nX, mean = mean[1], sd = sd[1]), A1 = rnorm(nX, mean = mean[2], sd = sd[2])),
-    marg = rnorm(nY, mean = mean[3], sd = sd[3]),
-    inter = rnorm(nZ12, mean = mean[4], sd = sd[4])
-  ))
+  stopifnot(length(mean)==4)
+  stopifnot(length(sd)==4)
+  if(is.list(mean)){
+    stopifnot(
+      (length(mean[[1]])==nX)|(length(mean[[2]])==nX)|
+        (length(mean[[3]])==nY)|(length(mean[[4]])==nZ12)
+    )
+  }
+  if(is.list(sd)){
+    stopifnot(
+      (length(sd[[1]])==nX)|(length(sd[[2]])==nX)|
+        (length(sd[[3]])==nY)|(length(sd[[4]])==nZ12)
+    )
+  }
+
+  model <- list(
+    syner = list(
+      A0 = rnorm(nX, mean = mean[[1]], sd = sd[[1]]),
+      A1 = rnorm(nX, mean = mean[[2]], sd = sd[[2]])
+    ),
+    marg = rnorm(nY, mean = mean[[3]], sd = sd[[3]]),
+    inter = rnorm(nZ12, mean = mean[[4]], sd = sd[[4]])
+  )
+
+  return(model)
 }
 
 #' Simulates a binary phenotye
@@ -68,7 +126,7 @@ gen_model <- function(nX, nY, nZ12, mean = rep(0, 4), sd = rep(1, 4)) {
 #' paramter
 #'
 #' @param X genotype matrix
-#' @param causal causal SNPs
+#' @param causal causal SNPs.
 #' @param model disease model
 #' @param intercept binary flag. If \code{intercept=TRUE}, a non-null intercept
 #'   is added so that the output is (approximately) balanced between cases and
