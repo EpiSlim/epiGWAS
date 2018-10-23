@@ -51,12 +51,17 @@ BOOST <- function(A, X, Y, ncores = 1) {
     loglikelihood <- apply(X, 2, ratio)
 
   } else {
-    cl <- snow::makeCluster(ncores)
-    doSNOW::registerDoSNOW(cl)
+    if(requireNamespace("doSNOW", quietly = TRUE)) {
+      cl <- snow::makeCluster(ncores)
+      doSNOW::registerDoSNOW(cl)
 
-    loglikelihood <-parallel::parApply(cl, X, 2, ratio)
+      loglikelihood <-parallel::parApply(cl, X, 2, ratio)
 
-    snow::stopCluster()
+      snow::stopCluster()
+    } else {
+      warning("Multithreading requires the installation of the doSNOW package")
+      loglikelihood <- apply(X, 2, ratio)
+    }
 
   }
 
