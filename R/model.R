@@ -1,64 +1,99 @@
-#' Samples causal SNPs
+#' Samples causal SNPs with different effect types
 #'
+#' The sampled SNPs are combined in a list of character vectors with the
+#' following names: target, marginal, inter1 and inter2. Through the
+#' parameters \code{overlap_marg} and \code{overlap_inter}, the synergistic
+#' SNPs with the target can have additional marginal/epistatic effects. The
+#' SNPs are consecutively sampled in the following order: target, marginal,
+#' inter1 and inter2. For each SNP, we iteratively sample until the picked
+#' SNP candidate meets the constraints defined by \code{thresh_MAF} and
+#' \code{window_size} (see Arguments for more details) or until the maximum
+#' number of resamplings is reached. To avoid redundancy, we sample at most
+#' one SNP per cluster.
 #'
+#' @section Warning:
+#' Make sure to supply the SNP IDs in \code{names(clusters)}. The SNPs in
+#' the output list are referenced by their names.
 #'
+#' @param nX number of SNPs interacting with the target variant
+#' @param nY number of SNPs with marginal effects
+#' @param nZ12 nummber of SNP pairs with epistatic effects
+#' @param clusters vector of cluster memberships. Typically, the output
+#'   of \code{\link[stats::cutree]{cutree}}. For ease of identification,
+#'   the SNP IDs in \code{names(clusters)} are mandatory.
+#' @param MAF vector of minor allele frequencies. The order of the SNPs in
+#'   \code{MAF} is identical to that in \code{clusters}.
+#' @param thresh_MAF lower-bound on the minor allele frequencies of
+#'   causal SNPs. Rare variants are inherently difficult to recover. Assessing
+#'   the retrieval performance on common variants better reflects the true
+#'   performance of the epistasis detection algorithm.
+#' @param window_size in number of clusters. Beside the target variant, the
+#'   other causal SNPs are sampled outside of a window centered around the
+#'   target. On each side of the target variant, the number of clusters to
+#'   discard is \code{window_size}.
+#' @param overlap_marg number of SNPs with both synergistic effects with the
+#'   target and mariginal effects
+#' @param overlap_inter number of SNPs with both synergistic effects with the
+#'   target and additional epistatic effects
+#' @param max_iter maximum number of resamplings for each SNP. If exceeded,
+#'   the function generates an error
 #'
-#' @param nX
-#' @param nY
-#' @param nZ12
-#' @param clusters
-#' @param MAF
-#' @param thresh.MAF
-#' @windo
+#' @return list of character vectors corresponding to the causal SNP IDs. The
+#'   output list entries are: target, marginal, inter1 and inter2. An
+#'   epistatic pair is obtained from the combination of two SNPs with
+#'   identical positions in \code{inter1} and \code{inter2}.
 #'
-#'
-#'
-#'
-#'
-#'
-sample_SNP <- function(nX, nY, nZ12, clusters, MAF, thresh.MAF = 0.2,
-                       window.size = 3, overlap.marg = 0, overlap.inter = 0) {
-  stopifnot(overlap.marg + overlap.inter < nX)
-  active <- rep(NULL, 1 + nX + nY + 2 * nZ12 - (overlap.marg + overlap.inter))
+#' @export
+sample_SNP <- function(nX, nY, nZ12, clusters, MAF, thresh_MAF = 0.2,
+                       window_size = 3, overlap_marg = 0, overlap_inter = 0, max_iter = 1e4) {
+  stopifnot((thresh_MAF > 0) & (thresh_MAF <= 0.5))
+  stopifnot(is.integer(window_size))
+  stopifnot(!is.integer(clusters))
+  stopifnot(!is.null(names(clusters)))
+  stopifnot(length(clusters) == length(MAF))
+  stopifnot(overlap_marg + overlap_inter < nX)
+  stopifnot(overlap_marg < nY)
+  stopifnot(overlap_inter < nZ12)
 
-  copy.clusters <- clusters
-  copy.MAF <- MAF
-
-  max.iter <- 1e4
-
-  for (i in 1:(1 + nX + nY + 2 * nZ12 - overlap.inter - overlap.marg)) {
+  active <- rep(NULL, 1 + nX + nY + 2 * nZ12 - (overlap_marg + overlap_inter))
+  for (i in 1:length(active)) {
     iter <- 0
     cdt <- FALSE
     while (cdt == FALSE) {
       iter <- iter + 1
-      candidate.SNP <- sample.int(length(copy.clusters), size = 1)
-      candidate.name <- names(copy.clusters)[candidate.SNP]
-      cdt <- (copy.MAF[candidate.SNP] > thresh.MAF)
-      if (i > 1) cdt <- cdt & (abs(clusters[candidate.name] - clusters[active[1]]) > window.size)
-      if (iter > max.iter) stop("The MAF constraint can not be satisfied")
+      candidate_SNP <- sample.int(length(clusters), size = 1)
+      candidate_name <- names(clusters)[candidate_SNP]
+      cdt <- (MAF[candidate_SNP] > thresh_MAF)
+      if (i == 1) {
+        cluster_target <- clusters[active[1]]
+      } else {
+        cdt <- cdt & (abs(clusters[candidate_name] - cluster_target) > window_size)
+      }
+      if (iter > max_iter) stop("The MAF constraint can not be satisfied")
     }
-    active[i] <- candidate.name
-    copy.MAF <- copy.MAF[copy.clusters != copy.clusters[candidate.SNP]]
-    copy.clusters <- copy.clusters[copy.clusters != copy.clusters[candidate.SNP]]
+    active[i] <- candidate_name
+    MAF <- MAF[(clusters != clusters[candidate_SNP])]
+    clusters <- clusters[(clusters != clusters[candidate_SNP])]
   }
 
-
-  marg.idx <- sample.int(nX, overlap.marg)
-  if (overlap.marg == 0) {
-    inter.idx <- sample((1:nX), overlap.inter)
+  marg_idx <- sample.int(nX, overlap_marg)
+  if (overlap_marg == 0) {
+    inter_idx <- sample((1:nX), overlap_inter)
   }
   else {
-    inter.idx <- sample((1:nX)[-marg.idx], overlap.inter)
+    inter_idx <- sample((1:nX)[-marg_idx], overlap_inter)
   }
 
-  return(list(
+  SNP_list <- list(
     target = active[1], syner = active[2:(nX + 1)],
-    marginal = active[c((nX + 2):(nX + nY + 1 - overlap.marg), 1 + marg.idx)],
-    inter1 = active[c((nX + nY + 2):(nX + nY + nZ12 + 1 - overlap.inter) -
-                        overlap.marg, 1 + inter.idx)],
-    inter2 = active[((nX + nY + nZ12 + 2 - (overlap.marg + overlap.inter)):
+    marginal = active[c((nX + 2):(nX + nY + 1 - overlap_marg), 1 + marg_idx)],
+    inter1 = active[c((nX + nY + 2):(nX + nY + nZ12 + 1 - overlap_inter) -
+                        overlap_marg, 1 + inter_idx)],
+    inter2 = active[((nX + nY + nZ12 + 2 - (overlap_marg + overlap_inter)):
                        length(active))]
-  ))
+  )
+
+  return(SNP_list)
 }
 
 #' Samples effect sizes for the disease model
@@ -191,7 +226,7 @@ sim_phenotype <- function(X, causal, model, intercept=TRUE) {
 #' @examples
 #' hc <- hclust(dist(USArrests))
 #' clusters <- cutree(hc, k = 10)
-#' merge.cluster(clusters, center=5, window.size=2)
+#' merge.cluster(clusters, center=5, k=2)
 #'
 #' @export
 merge_cluster <- function(clusters, center, k = 3) {
