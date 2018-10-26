@@ -1,20 +1,28 @@
 #' Implements the outcome weighted learning approach
 #'
-#' briefly explain modified outcome
+#' To recover the synergistic interactions between the target \code{A} and the
+#' rest of the genotype \code{X}, \code{OWL} formulates a weighted binary
+#' classification problem. The outcome is the mapping of\code{A} to \{0,1\}. The
+#' covariates are \code{X}. The propensity scores and the phenotypes are
+#' combined in the sample weights \eqn{Y/\pi(A\lvert X)}{Y/P(A|X)}. For binary
+#' phenotypes, OWL is a case-only approach. The approach also accommodates
+#' nonnegative continuous phenotypes.
 #'
-#' @param A target variant. The variable A must be encoded as (0, 1)
-#' or (0, 1, 2)
+#' @param A target variant. The variable A must be encoded as (0, 1) or (0, 1,
+#'   2)
 #' @param X rest of the genotype
 #' @param Y phenotype (binary or continuous)
 #' @param propensity propensity scores (a vector or a two-column matrix)
-#' @param ... additional arguments to \code{stabilityGLM}
+#' @param ... additional arguments to \code{\link{stabilityGLM}}
 #'
-#' @details If the outcome \code{Y} is not nonnegative, we translate it
-#' to get
+#' @return a vector containing the area under the stability selection path for
+#'   each variable in \code{X}
+#'
+#' @details If the outcome \code{Y} is not nonnegative, we translate it to get
 #'
 #' @references Zhao, Y., Zeng, D., Rush, A. J., & Kosorok, M. R. (2012).
-#' Estimating Individualized Treatment Rules Using Outcome Weighted Learning.
-#' Journal of the American Statistical Association, 107(499), 1106–1118.
+#'   Estimating Individualized Treatment Rules Using Outcome Weighted Learning.
+#'   Journal of the American Statistical Association, 107(499), 1106–1118.
 #'
 #' @export
 OWL <- function(A, X, Y, propensity, ...) {
@@ -55,6 +63,21 @@ OWL <- function(A, X, Y, propensity, ...) {
 
 #' Implements the modified outcome approach
 #'
+#' In the modified outcome approach, we estimate the risk difference
+#' \eqn{\mathbb{E}\left[Y\lvert A=1,X\right]-\mathbb{E}\left[Y\lvert A=0,X\right]}.
+#' The risk difference measures the synergy between \code{A} and the set of
+#' covariates in \code{X}. For genome-wide associtation studies, it can be
+#' understood as a pure epistatic term. For a single sample, we only
+#' observe one of the two possibilities A=1 or A=0, rendering the direct
+#' estimate of the risk difference impossible. Through propensity scores,
+#' modified outcome was proposed as a solution to this problem. The risk
+#' difference is recovered by constructing a modified outcome that combines
+#' A, Y and the propensity score \eqn{\pi(A\lvert X)}{P(A|X)}:
+#' \eqn{Y \times \left[\frac{A}{\pi(A=1\lvert X)} - \frac{1-A}{1-\pi(A=1\lvert X)} \right]}{Y x [A/P(A=1|X) -(1-A)/P(A=0|X)]}.
+#' The use of \code{\link{stabilityGLM}} or \code{\link{stabilityBIG}} for
+#' the modified outcome regression allows us to recover the
+#' interacting components within \code{X}.
+#'
 #' @param A target variant
 #' @param X rest of the genotype
 #' @param Y phenotype
@@ -63,6 +86,13 @@ OWL <- function(A, X, Y, propensity, ...) {
 #' parallelized fashion with the \code{\link{stabilityBIG}} function
 #' @param ... additional arguments to be passed to \code{stabilityGLM} or
 #' \code{stabilityBIG}
+#'
+#' @return a vector containing the area under the stability selection path for
+#'   each variable in \code{X}
+#'
+#' @references Rosenbaum, Paul R., and Donald B. Rubin. "The central role of
+#' the propensity score in observational studies for causal effects."
+#' Biometrika 70.1 (1983): 41-55.
 #'
 #' @export
 modified_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
@@ -98,6 +128,15 @@ modified_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
 
 #' Implements the normalized modified outcome approach
 #'
+#' Normalized modified outcome is an improvement to \code{\link{modified_outcome}}.
+#' Its large-sample variance is lower than the original modified outcome approach.
+#' The only diffrence between the two methods lies in the normalization of the
+#' propensity scores. The inverses of the propensity scores
+#' \eqn{1/\pi(A=1\lvert X)}{1/P(A=1|X)} and \eqn{1/\pi(A=0\lvert X)}{1/P(A=0|X)} are
+#' respectively normalized by their sum
+#' \eqn{\sum_{i} 1/\pi(A_i=1\lvert X_i)}{sum _i 1/P(A_i=1|X_i)} and
+#' \eqn{\sum_{i} 1/\pi(A_i=0\lvert X_i)}{sum _i 1/P(A_i=0|X_i)}.
+#'
 #' @param A target variant
 #' @param X rest of the genotype
 #' @param Y phenotype
@@ -106,6 +145,9 @@ modified_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
 #' parallelized fashion
 #' @param ... additional arguments to be passed to \code{stabilityGLM} or
 #' \code{stabilityBIG}
+#'
+#' @return a vector containing the area under the stability selection path for
+#'   each variable in \code{X}
 #'
 #' @export
 normalized_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
@@ -147,6 +189,14 @@ normalized_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
 }
 #' Implements the shifted modified outcome approach
 #'
+#' Shifted modified outcome is an improvement to modified outcome. It is
+#' a heuristic which consists in the addition of of a small regularization to
+#' the inverse of the propensity score. The goal is to avoid numerical
+#' instability due to low propensity scores values. More precisely, the
+#' inverses of the propensity scores are
+#' \eqn{1/(\pi(A\lvert X) + \xi)}{1/(P(A|X) + shift)}. We recommend keeping
+#' the parameter\eqn{\xi}{shift} to its default value of 0.1.
+#'
 #' @param A target variant
 #' @param X rest of the genotype
 #' @param Y phenotype
@@ -157,6 +207,9 @@ normalized_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
 #' numerical stability
 #' @param ... additional arguments to be passed to \code{stabilityGLM} or
 #' \code{stabilityBIG}
+#'
+#' @return a vector containing the area under the stability selection path for
+#'   each variable in \code{X}
 #'
 #' @export
 shifted_outcome <- function(A, X, Y, propensity, shift = .1, parallel = FALSE, ...) {
@@ -192,6 +245,19 @@ shifted_outcome <- function(A, X, Y, propensity, shift = .1, parallel = FALSE, .
 }
 #' Implements the robust modified outcome approach
 #'
+#' A key feature of \code{robust_outcome} is its resilience to the misspecification
+#' of the inverse of the propensity score, which is a major limitation of classical
+#' modified outcome approaches.
+#' Except for the heuristic \code{shifted_outcome}, all of
+#' the modified outcome approaches belong to a parameterized class of unbiased
+#' estimators for the risk difference term
+#' \eqn{\mathbb{E}\left[Y\lvert A=1,X\right]-\mathbb{E}\left[Y\lvert A=0,X\right]}.
+#' Robust modified outcome is the approach with the least large-sample variance
+#' within that class.
+#' This theoretical grounding is consistent with the observed superior performance
+#' of \code{robust_outcome}. For exhaustive details about this approach, see Lunceford
+#' and Davidian (2004)
+#'
 #' @param A target variant
 #' @param X rest of the genotype
 #' @param Y phenotype
@@ -200,6 +266,13 @@ shifted_outcome <- function(A, X, Y, propensity, shift = .1, parallel = FALSE, .
 #' parallelized fashion
 #' @param ... additional arguments to be passed to \code{stabilityGLM} or
 #' \code{stabilityBIG}
+#'
+#' @return a vector containing the area under the stability selection path for
+#'   each variable in \code{X}
+#'
+#' @references Lunceford, J. K., & Davidian, M. (2004). Stratification and
+#' weighting via the propensity score in estimation of causal treatment effects:
+#' A comparative study. Statistics in Medicine, 23(19), 2937–2960.
 #'
 #' @export
 robust_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
