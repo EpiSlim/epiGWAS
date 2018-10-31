@@ -25,14 +25,14 @@
 #' @export
 forward_sample <- function(x, p_init, p_trans, p_emit) {
   stopifnot(
-    (length(dim(p_trans)) == 3) | (length(dim(p_emit)) == 3) | is.vector(p_emit)
+    (length(dim(p_trans)) == 3) & (length(dim(p_emit)) == 3) & is.vector(p_init)
   )
   stopifnot(length(x) == (dim(p_trans)[1] + 1))
   stopifnot(length(p_init) == dim(p_trans)[2])
   stopifnot(dim(p_trans)[2] == dim(p_trans)[3])
-  stopifnot(dim(p_trans)[2] == dim(p_emit)[2])
+  stopifnot(dim(p_trans)[2] == dim(p_emit)[3])
   stopifnot((dim(p_trans)[1] + 1) == dim(p_emit)[1])
-  stopifnot(dim(p_emit)[3] == 3)
+  stopifnot(dim(p_emit)[2] == 3)
 
   mat_one <- array(1, dim = rep(length(p_init), 2))
   p_obs <- log(p_init) + log(p_emit[1, x[1] + 1, ])
@@ -75,9 +75,9 @@ forward <- function(X, p_init, p_trans, p_emit, ncores = 1) {
   stopifnot(dim(X)[2] == (dim(p_trans)[1] + 1))
   stopifnot(length(p_init) == dim(p_trans)[2])
   stopifnot(dim(p_trans)[2] == dim(p_trans)[3])
-  stopifnot(dim(p_trans)[2] == dim(p_emit)[2])
+  stopifnot(dim(p_trans)[2] == dim(p_emit)[3])
   stopifnot((dim(p_trans)[1] + 1) == dim(p_emit)[1])
-  stopifnot(dim(p_emit)[3] == 3)
+  stopifnot(dim(p_emit)[2] == 3)
 
   if (ncores == 1) {
     p_obs <- apply(

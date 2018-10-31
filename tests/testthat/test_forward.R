@@ -1,0 +1,23 @@
+context("Forward")
+
+test_that("forward_sample computes a valid probability", {
+  p <- 50
+  K <- 5
+
+  p_init <- rep(1 / K, K)
+  p_trans <- array(runif((p - 1) * K * K), c(p - 1, K, K))
+  for (j in 1:(p - 1)) {
+    p_trans[j, , ] <- p_trans[j, , ] / (matrix(rowSums(p_trans[j, , ]), ncol = 1) %*% rep(1, K))
+  }
+  p_emit <- array(stats::runif(p * 3 * K), c(p, 3, K))
+  for (j in 1:p) {
+    p_emit[j, , ] <- p_emit[j, , ] / (matrix(rep(1, 3), ncol = 1) %*% colSums(p_emit[j, , ]))
+  }
+
+  x <- (runif(p, min = 0, max = 1) < runif(p, min = 0, max = 1)) +
+    (runif(p, min = 0, max = 1) < runif(p, min = 0, max = 1))
+  log_prob <- forward_sample(x, p_init, p_trans, p_emit)
+
+  expect_lte(exp(log_prob), 1)
+  expect_gte(exp(log_prob), 0)
+})
