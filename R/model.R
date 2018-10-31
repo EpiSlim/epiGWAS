@@ -174,6 +174,7 @@ gen_model <- function(nX, nY, nZ12, mean = rep(0, 4), sd = rep(1, 4)) {
 #'
 #' @export
 sim_phenotype <- function(X, causal, model, intercept = TRUE) {
+  stopifnot(!is.null(colnames(X)))
   stopifnot(!(is.null(causal[["target"]]) | is.null(causal[["syner"]]) |
     is.null(causal[["marginal"]]) | is.null(causal[["inter1"]]) |
     is.null(causal[["inter2"]])

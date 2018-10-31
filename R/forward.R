@@ -93,7 +93,7 @@ forward <- function(X, p_init, p_trans, p_emit, ncores = 1) {
         function(z) return(forward_sample(z, p_init, p_trans, p_emit))
       )
 
-      snow::stopCluster()
+      snow::stopCluster(cl)
     } else {
       warning("Multithreading requires the installation of the doSNOW package")
       p_obs <- apply(
