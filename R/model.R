@@ -47,15 +47,18 @@
 sample_SNP <- function(nX, nY, nZ12, clusters, MAF, thresh_MAF = 0.2,
                        window_size = 3, overlap_marg = 0, overlap_inter = 0, max_iter = 1e4) {
   stopifnot((thresh_MAF > 0) & (thresh_MAF <= 0.5))
-  stopifnot(is.integer(window_size))
-  stopifnot(!is.integer(clusters))
   stopifnot(!is.null(names(clusters)))
   stopifnot(length(clusters) == length(MAF))
   stopifnot(overlap_marg + overlap_inter < nX)
   stopifnot(overlap_marg < nY)
   stopifnot(overlap_inter < nZ12)
 
-  active <- rep(NULL, 1 + nX + nY + 2 * nZ12 - (overlap_marg + overlap_inter))
+  if (is.null(names(MAF))) {
+    names(MAF) <- names(clusters)
+  } else {
+    stopifnot(all(names(MAF) == names(clusters)))
+  }
+  active <- rep(0, 1 + nX + nY + 2 * nZ12 - (overlap_marg + overlap_inter))
   for (i in 1:length(active)) {
     iter <- 0
     cdt <- FALSE
@@ -65,15 +68,15 @@ sample_SNP <- function(nX, nY, nZ12, clusters, MAF, thresh_MAF = 0.2,
       candidate_name <- names(clusters)[candidate_SNP]
       cdt <- (MAF[candidate_SNP] > thresh_MAF)
       if (i == 1) {
-        cluster_target <- clusters[active[1]]
+        cluster_target <- clusters[candidate_name]
       } else {
         cdt <- cdt & (abs(clusters[candidate_name] - cluster_target) > window_size)
       }
       if (iter > max_iter) stop("The MAF constraint can not be satisfied")
     }
     active[i] <- candidate_name
-    MAF <- MAF[(clusters != clusters[candidate_SNP])]
-    clusters <- clusters[(clusters != clusters[candidate_SNP])]
+    MAF <- subset(MAF, (clusters != clusters[candidate_SNP]))
+    clusters <- subset(clusters, (clusters != clusters[candidate_SNP]))
   }
 
   marg_idx <- sample.int(nX, overlap_marg)
@@ -83,7 +86,6 @@ sample_SNP <- function(nX, nY, nZ12, clusters, MAF, thresh_MAF = 0.2,
   else {
     inter_idx <- sample((1:nX)[-marg_idx], overlap_inter)
   }
-
   SNP_list <- list(
     target = active[1], syner = active[2:(nX + 1)],
     marginal = active[c((nX + 2):(nX + nY + 1 - overlap_marg), 1 + marg_idx)],
@@ -230,9 +232,8 @@ sim_phenotype <- function(X, causal, model, intercept = TRUE) {
 #'
 #' @export
 merge_cluster <- function(clusters, center, k = 3) {
-  stopifnot(!is.integer(clusters))
   stopifnot(center %in% clusters)
-  if (is.atomic(k)) {
+  if (is.atomic(k) & length(k) == 1L) {
     stopifnot((2 * k + 1) <= nlevels(as.factor(clusters)))
     idx_window <- center - (-k:k)
   } else {
