@@ -212,7 +212,8 @@ normalized_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
 #'   each variable in \code{X}
 #'
 #' @export
-shifted_outcome <- function(A, X, Y, propensity, shift = .1, parallel = FALSE, ...) {
+shifted_outcome <- function(A, X, Y, propensity,
+                            shift = .1, parallel = FALSE, ...) {
   shift_args <- list(...)
   if ("family" %in% names(shift_args)) {
     stopifnot(shift_args["family"] == "gaussian")
@@ -292,8 +293,9 @@ robust_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
   C0 <- sum((as.numeric(A == 0) - propensity[, 1]) / propensity[, 1]) /
     sum(((as.numeric(A == 0) - propensity[, 1]) / propensity[, 1])^2)
 
-  propensity <- (propensity - matrix(rep(c(C0, C1), each = length(A)), ncol = 2)) /
-    (propensity**2)
+  propensity <- (propensity - matrix(rep(c(C0, C1), each = length(A)),
+    ncol = 2
+  )) / (propensity**2)
 
   propensity <- t(t(propensity) /
     c(

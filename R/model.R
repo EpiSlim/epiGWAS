@@ -88,9 +88,9 @@ sample_SNP <- function(nX, nY, nZ12, clusters, MAF, thresh_MAF = 0.2,
     target = active[1], syner = active[2:(nX + 1)],
     marginal = active[c((nX + 2):(nX + nY + 1 - overlap_marg), 1 + marg_idx)],
     inter1 = active[c((nX + nY + 2):(nX + nY + nZ12 + 1 - overlap_inter) -
-                        overlap_marg, 1 + inter_idx)],
+      overlap_marg, 1 + inter_idx)],
     inter2 = active[((nX + nY + nZ12 + 2 - (overlap_marg + overlap_inter)):
-                       length(active))]
+    length(active))]
   )
 
   return(SNP_list)
@@ -123,18 +123,18 @@ sample_SNP <- function(nX, nY, nZ12, clusters, MAF, thresh_MAF = 0.2,
 #'
 #' @export
 gen_model <- function(nX, nY, nZ12, mean = rep(0, 4), sd = rep(1, 4)) {
-  stopifnot(length(mean)==4)
-  stopifnot(length(sd)==4)
-  if(is.list(mean)){
+  stopifnot(length(mean) == 4)
+  stopifnot(length(sd) == 4)
+  if (is.list(mean)) {
     stopifnot(
-      (length(mean[[1]])==nX)|(length(mean[[2]])==nX)|
-        (length(mean[[3]])==nY)|(length(mean[[4]])==nZ12)
+      (length(mean[[1]]) == nX) | (length(mean[[2]]) == nX) |
+        (length(mean[[3]]) == nY) | (length(mean[[4]]) == nZ12)
     )
   }
-  if(is.list(sd)){
+  if (is.list(sd)) {
     stopifnot(
-      (length(sd[[1]])==nX)|(length(sd[[2]])==nX)|
-        (length(sd[[3]])==nY)|(length(sd[[4]])==nZ12)
+      (length(sd[[1]]) == nX) | (length(sd[[2]]) == nX) |
+        (length(sd[[3]]) == nY) | (length(sd[[4]]) == nZ12)
     )
   }
 
@@ -171,14 +171,14 @@ gen_model <- function(nX, nY, nZ12, mean = rep(0, 4), sd = rep(1, 4)) {
 #' factor (TRUE/FALSE).
 #'
 #' @export
-sim_phenotype <- function(X, causal, model, intercept=TRUE) {
+sim_phenotype <- function(X, causal, model, intercept = TRUE) {
   stopifnot(!(is.null(causal[["target"]]) | is.null(causal[["syner"]]) |
-                is.null(causal[["marginal"]]) | is.null(causal[["inter1"]]) |
-                is.null(causal[["inter2"]])
+    is.null(causal[["marginal"]]) | is.null(causal[["inter1"]]) |
+    is.null(causal[["inter2"]])
   ))
   stopifnot(!(is.null(model[["syner"]][["A0"]]) |
-                is.null(model[["syner"]][["A1"]]) |
-                is.null(model[["marg"]]) | is.null(model[["inter"]])
+    is.null(model[["syner"]][["A1"]]) |
+    is.null(model[["marg"]]) | is.null(model[["inter"]])
   ))
   stopifnot(
     (length(causal[["syner"]]) == length(model[["syner"]][["A0"]])) &
@@ -193,7 +193,7 @@ sim_phenotype <- function(X, causal, model, intercept=TRUE) {
     (X[, causal$marginal] %*% model$marg) +
     (X[, causal$inter1] * X[, causal$inter2]) %*% model$inter
 
-  if(intercept){
+  if (intercept) {
     risk <- risk - mean(risk)
   }
 

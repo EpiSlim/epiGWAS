@@ -28,7 +28,7 @@ forward_sample <- function(x, p_init, p_trans, p_emit) {
     (length(dim(p_trans)) == 3) | (length(dim(p_emit)) == 3) | is.vector(p_emit)
   )
   stopifnot(length(x) == (dim(p_trans)[1] + 1))
-  stopifnot(length(pInit) == dim(p_trans)[2])
+  stopifnot(length(p_init) == dim(p_trans)[2])
   stopifnot(dim(p_trans)[2] == dim(p_trans)[3])
   stopifnot(dim(p_trans)[2] == dim(p_emit)[2])
   stopifnot((dim(p_trans)[1] + 1) == dim(p_emit)[1])
@@ -37,7 +37,9 @@ forward_sample <- function(x, p_init, p_trans, p_emit) {
   mat_one <- array(1, dim = rep(length(p_init), 2))
   p_obs <- log(p_init) + log(p_emit[1, x[1] + 1, ])
   for (i in 2:length(x)) {
-    p_obs <- matrixStats::rowLogSumExps(log(t(p_trans[i - 1, , ])) + mat_one %*% diag(p_obs)) +
+    p_obs <- matrixStats::rowLogSumExps(
+      log(t(p_trans[i - 1, , ])) + mat_one %*% diag(p_obs)
+    ) +
       log(p_emit[i, x[i] + 1, ])
   }
 
@@ -71,7 +73,7 @@ forward <- function(X, p_init, p_trans, p_emit, ncores = 1) {
     (length(dim(p_trans)) == 3) | (length(dim(p_emit)) == 3) | is.vector(p_emit)
   )
   stopifnot(dim(X)[2] == (dim(p_trans)[1] + 1))
-  stopifnot(length(pInit) == dim(p_trans)[2])
+  stopifnot(length(p_init) == dim(p_trans)[2])
   stopifnot(dim(p_trans)[2] == dim(p_trans)[3])
   stopifnot(dim(p_trans)[2] == dim(p_emit)[2])
   stopifnot((dim(p_trans)[1] + 1) == dim(p_emit)[1])
@@ -161,7 +163,6 @@ cond_prob <- function(X, target_name, out_path = NULL, X_filename = NULL,
   r_file <- paste(fp_out_path, "_rhat.txt", sep = "")
   theta_file <- paste(fp_out_path, "_thetahat.txt", sep = "")
   alpha_file <- paste(fp_out_path, "_alphahat.txt", sep = "")
-  char_file <- paste(fp_out_path, "_origchars", sep = "")
 
   hmm <- SNPknock::SNPknock.fp.loadFit(r_file, theta_file, alpha_file, X[1, ])
 
