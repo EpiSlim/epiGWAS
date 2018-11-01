@@ -86,6 +86,7 @@ forward <- function(X, p_init, p_trans, p_emit, ncores = 1) {
   } else {
     if (requireNamespace("doSNOW", quietly = TRUE)) {
       cl <- snow::makeCluster(ncores)
+      snow::clusterExport(cl, "forward_sample")
       doSNOW::registerDoSNOW(cl)
 
       p_obs <- parallel::parApply(

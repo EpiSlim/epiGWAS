@@ -11,7 +11,7 @@
 #' and \code{n_subsample} columns.
 #'
 subsample <- function(n, size = n %/% 2, n_subsample) {
-  idx <- array(NULL, dim = c(size, n_subsample))
+  idx <- array(dim = c(size, n_subsample))
   for (i in 1:n_subsample) {
     idx[, i] <- sample.int(n = n, size = size, replace = FALSE)
   }
