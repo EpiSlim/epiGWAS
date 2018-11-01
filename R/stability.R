@@ -82,7 +82,7 @@ subsample <- function(n, size = n %/% 2, n_subsample) {
 #' @seealso \code{\link[glmnet::glmnet-package]{glmnet-package}}
 #'
 #' @export
-stabilityGLM <- function(X, Y, weights, family = "gaussian", n_subsample = 20, n_lambda = 100,
+stabilityGLM <- function(X, Y, weights = rep(1, nrow(X)), family = "gaussian", n_subsample = 20, n_lambda = 100,
                          short = TRUE, lambda_min_ratio = 0.01, eps = 1e-5) {
   stopifnot(family %in% c("gaussian", "binomial"))
   stopifnot(all(weights >= 0))
@@ -157,9 +157,8 @@ stabilityGLM <- function(X, Y, weights, family = "gaussian", n_subsample = 20, n
 #' thresholded paths
 #' @param ncores number of cores for the
 #'  \code{\link[biglasso::biglasso]{biglasso}} solver
-#' @param verbose whether to display the per-sample progress of the
-#' stability selection procedure
-#' @param dir directory for writing the \code{big.matrix} backing files
+#' @param dir directory for writing the \code{big.matrix} backing files. If not
+#'   given, a temporary directory is created
 #' @param prefix character prefix for the \code{big.matrix} filenames
 #'
 #' @return a vector grouping the aucs of all covariates within \code{X}
@@ -177,7 +176,7 @@ stabilityGLM <- function(X, Y, weights, family = "gaussian", n_subsample = 20, n
 #' @export
 stabilityBIG <- function(X, Y, family = "gaussian", n_subsample = 20, n_lambda = 100,
                          lambda_min_ratio = 0.01, eps = 1e-5, short = TRUE,
-                         ncores = 4, verbose = TRUE, dir = "tmp", prefix = "subX") {
+                         ncores = 4, dir = tempdir(), prefix = "subX") {
   stopifnot(family %in% c("gaussian", "binomial"))
   stopifnot(bigmemory::is.big.matrix(X))
   stopifnot(dir.exists(dir))
@@ -209,15 +208,16 @@ stabilityBIG <- function(X, Y, family = "gaussian", n_subsample = 20, n_lambda =
   stab <- array(0, dim = c(length_lambda, dim(X)[2]))
 
   for (i in 1:n_subsample) {
-    if (verbose) {
-      message("----- Running stability selection for subsample ", i, " -----")
-    }
+
+    sink("/dev/null")
     sub_X_desc <- bigpca::big.select(
       X,
       select.rows = idx[, i], select.cols = 1:ncol(X),
       delete.existing = TRUE, deepC = TRUE,
-      dir = dir, pref = prefix
+      dir = dir, pref = prefix, verbose = FALSE
     )
+    sink()
+
     sub_X <- bigpca::get.big.matrix(sub_X_desc)
     sub_X_shared <- bigmemory::deepcopy(sub_X, shared = FALSE, type = "double")
     partial_fit <- biglasso::biglasso(
