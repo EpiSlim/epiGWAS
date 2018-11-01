@@ -243,7 +243,7 @@ merge_cluster <- function(clusters, center, k = 3) {
   }
 
   clusters[which(clusters %in% idx_window)] <- center
-  clusters <- sapply(clusters, function(s) match(s, sort(unique(clusters))))
+  clusters <- vapply(clusters, function(s) match(s, sort(unique(clusters))))
 
   return(clusters)
 }

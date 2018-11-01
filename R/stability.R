@@ -117,7 +117,7 @@ stabilityGLM <- function(X, Y, weights = rep(1, nrow(X)), family = "gaussian", n
 
   stab <- stab / n_subsample
 
-  aucs <- sapply(1:ncol(X), function(i) {
+  aucs <- vapply(1:ncol(X), function(i) {
     DescTools::AUC(
       x = 1:((1 - short) * n_lambda + short * (n_lambda %/% 2)),
       y = stab[1:((1 - short) * n_lambda + short * (n_lambda %/% 2)), i]
@@ -236,7 +236,7 @@ stabilityBIG <- function(X, Y, family = "gaussian", n_subsample = 20, n_lambda =
 
   stab <- stab / n_subsample
 
-  aucs <- sapply(1:ncol(stab), function(i) {
+  aucs <- vapply(1:ncol(stab), function(i) {
     DescTools::AUC(
       x = 1:((1 - short) * length_lambda + short * (length_lambda %/% 2)),
       y = stab[1:((1 - short) * length_lambda + short * (length_lambda %/% 2)), i]
