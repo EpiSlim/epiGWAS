@@ -109,11 +109,55 @@ forward <- function(X, p_init, p_trans, p_emit, ncores = 1) {
 #' Computes the propensity scores
 #'
 #' In this function, and for each sample, we compute both propensity scores
-#' \eqn{P(A=1\lvert X)}{P(A=1|X)} and \eqn{P(A=0\lvert X)}{P(A=0|X). The first
-#' step is to fit the fastPHASE hidden Markov model using the EM algorithm. The
-#' application of the forward algorithm allows us to estimate the joint
-#' probability of (A, X), for all values of the target variant A. Finally, the
-#' Bayes formula yields the desired propensity scores.
+#' \eqn{P(A=1\lvert X)}{P(A=1|X)} and \eqn{P(A=0\lvert X)}{P(A=0|X). The
+#' application of the forward algorithm on the passed \code{hmm} allows us to
+#' estimate the joint probability of (A, X), for all values of the target
+#' variant {0, 1, 2}. The Bayes formula yields the corresponding conditional
+#' probabilities. Depending on the binarization rule, we combine them to
+#' obtain the propensity scores.
+#'
+#' @param X genotype matrix
+#' @param target_name target variant ID
+#' @param hmm prefix for the fitted paramaters filenames. If \code{NULL},
+#'   the files are saved in a temporary directory.
+#' @param binary if \code{TRUE}, the target SNP values 0 and (1,2)
+#' are respectively mapped to 0 and 1. That describes a dominant mechanism.
+#' Otherwise, if \code{FALSE}, we encode a recessive mechanism where the values
+#' 0 and 1 respectively correspond to (0,1) and 2.
+#' @param ncores number of threads (default 1)
+#'
+#' @return two-column propensity score matrix. The first column lists the
+#' propensity score \eqn{P\left(A=0\lvert X\right)}{P(A=0|X)}, while the
+#' second gives \eqn{P\left(A=1\lvert X\right)}{P(A=1|X)}.
+#'
+#'
+#' @export
+cond_prob <- function(X, target_name, hmm, binary = TRUE, ncores = 1) {
+  stopifnot(target_name %in% colnames(X))
+  stopifnot(setequal(names(hmm), c("pInit", "Q", "pEmit")))
+
+  # Computing the propensity scores with the forward algorithm
+  p_obs <- matrix(nrow = nrow(X), ncol = 3)
+  X[, target_name] <- 0
+  p_obs[, 1] <- forward(X, hmm$pInit, hmm$Q, hmm$pEmit)
+  X[, target_name] <- 1
+  p_obs[, 2] <- forward(X, hmm$pInit, hmm$Q, hmm$pEmit)
+  X[, target_name] <- 2
+  p_obs[, 3] <- forward(X, hmm$pInit, hmm$Q, hmm$pEmit)
+  p_obs <- t(apply(p_obs, 1, function(x) return(x - matrixStats::logSumExp(x))))
+
+  if (binary) {
+    propensity <- cbind(exp(p_obs[, 1]), exp(p_obs[, 2]) + exp(p_obs[, 3]))
+  } else {
+    propensity <- cbind(exp(p_obs[, 1]) + exp(p_obs[, 2]), exp(p_obs[, 3]))
+  }
+
+  return(propensity)
+}
+
+#' In this function, we fit the fastPHASE hidden Markov model using the EM
+#' algorithm. The fastPHASE executable is required to run \code{fast_HMM}. It
+#' is available from the following web page: \url{http://scheet.org/software.html}
 #'
 #' @param X genotype matrix
 #' @param target_name target variant ID
@@ -125,29 +169,28 @@ forward <- function(X, p_init, p_trans, p_emit, ncores = 1) {
 #' @param n_state dimensionality of the latent space
 #' @param n_iter number of iterations for the EM algorithm
 #'
-#' @return two-column propensity score matrix. The first column lists the
-#' propensity score \eqn{P\left(A=0\lvert X\right)}{P(A=0|X)}, while the
-#' second gives \eqn{P\left(A=1\lvert X\right)}{P(A=1|X)}.
+#' @return fitted parameters of the fastPHASE HMM. They are grouped in a list
+#'   with the following fields: \code(pInit) for the initial marginal
+#'   distribution, the three-dimensional array \code{Q} for the transition
+#'   probabilities and finally \code{pEmit}, another three-dimensional array
+#'   for the emission probabilities
 #'
 #' @details Because of the quadratic complexity of the forward algorithm
 #' in terms  of the dimensionality of the latent space \code{n_state}, we
 #' recommend setting this parameter to 12. Choosing a higher number does
-#' not result in a dramatic increase of performance. Similarly, an optimal
-#' choice of the number of iterations for the EM algorithm  is between 20
+#' not result in a dramatic increase of performance. An optimal
+#' choice for the number of iterations for the EM algorithm  is between 20
 #' and 25.
-#'
-#' @details In the current implementation, the target SNP values 0 and (1,2)
-#' are respectively mapped to 0 and 1. That describes a dominant mechanism.
 #'
 #' @references Scheet, P., & Stephens, M. (2006). A fast and flexible
 #' statistical model for large-scale population genotype data: applications
 #' to inferring missing genotypes and haplotypic phase. American Journal of
 #' Human Genetics, 78(4), 629–644.
 #'
+#'
 #' @export
-cond_prob <- function(X, target_name, out_path = NULL, X_filename = NULL,
-                      fp_path = "bin/fastPHASE", n_state = 12, n_iter = 25) {
-  stopifnot(target_name %in% colnames(X))
+fast_HMM <- function(X, out_path = NULL, X_filename = NULL,
+                     fp_path = "bin/fastPHASE", n_state = 12, n_iter = 25) {
   if (!file.exists(fp_path)) {
     stop("Please download the fastPHASE executable to the indicated fp_path")
   }
@@ -167,15 +210,5 @@ cond_prob <- function(X, target_name, out_path = NULL, X_filename = NULL,
 
   hmm <- SNPknock::SNPknock.fp.loadFit(r_file, theta_file, alpha_file, X[1, ])
 
-  # Computing the propensity scores with the forward algorithm
-  p_obs <- matrix(nrow = nrow(X), ncol = 3)
-  X[, target_name] <- 0
-  p_obs[, 1] <- forward(X, hmm$p_init, hmm$Q, hmm$p_emit)
-  X[, target_name] <- 1
-  p_obs[, 2] <- forward(X, hmm$p_init, hmm$Q, hmm$p_emit)
-  X[, target_name] <- 2
-  p_obs[, 3] <- forward(X, hmm$p_init, hmm$Q, hmm$p_emit)
-  p_obs <- t(apply(p_obs, 1, function(x) return(x - matrixStats::logSumExp(x))))
-
-  return(cbind(exp(p_obs[, 1]), exp(p_obs[, 2]) + exp(p_obs[, 3])))
+  return(hmm)
 }
