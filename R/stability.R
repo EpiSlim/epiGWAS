@@ -69,7 +69,7 @@ subsample <- function(n, size = n %/% 2, n_subsample) {
 #' solution. For that reason, we recommend setting eps << 1.
 #'
 #' @details All of the elastic nets in this function are solved using the
-#' single-thread solver \code{\link[glmnet::glmnet]{glmnet}}
+#' single-thread solver \code{\link[glmnet]{glmnet}}
 #'
 #' @references Slim, L., Chatelain, C., Azencott, C.-A., & Vert, J.-P.
 #' (2018).Novel Methods for Epistasis Detection in Genome-Wide Association
@@ -79,7 +79,7 @@ subsample <- function(n, size = n %/% 2, n_subsample) {
 #' selection. Journal of the Royal Statistical Society: Series B
 #' (Statistical Methodology), 72(4), 417–473.
 #'
-#' @seealso \code{\link[glmnet::glmnet-package]{glmnet-package}}
+#' @seealso \code{\link[glmnet]{glmnet-package}}
 #'
 #' @export
 stabilityGLM <- function(X, Y, weights = rep(1, nrow(X)), family = "gaussian", n_subsample = 20, n_lambda = 100,
@@ -133,7 +133,7 @@ stabilityGLM <- function(X, Y, weights = rep(1, nrow(X)), family = "gaussian", n
 #' This function implements the same model selection procedure extensively
 #' described in \code{\link{stabilityGLM}}. The sole difference is the use
 #' of a different elastic net solver. In this function, we make use of
-#' \code{\link[biglasso::biglasso]{biglasso}}. Thanks to its parallel
+#' \code{\link[biglasso]{biglasso}}. Thanks to its parallel
 #' backend, \code{biglasso} scales well to
 #' high-dimensional GWAS atasets. However, in our case, because of the use of
 #' additional backend files, a slight decrease in running time is to be expected,
@@ -142,7 +142,7 @@ stabilityGLM <- function(X, Y, weights = rep(1, nrow(X)), family = "gaussian", n
 #' @family model selection functions
 #'
 #' @param X design matrix formatted as a
-#' \code{\link[bigmemory::big.matrix]{big.matrix}} object
+#' \code{\link[bigmemory]{big.matrix}} object
 #' @param Y response vector
 #' @param family response type. Either "gaussian" or "binomial"
 #' @param n_subsample number of subsamples for stability selection
@@ -156,7 +156,7 @@ stabilityGLM <- function(X, Y, weights = rep(1, nrow(X)), family = "gaussian", n
 #' of the stability path. We observed better performance for the
 #' thresholded paths
 #' @param ncores number of cores for the
-#'  \code{\link[biglasso::biglasso]{biglasso}} solver
+#'  \code{\link[biglasso]{biglasso}} solver
 #' @param dir directory for writing the \code{big.matrix} backing files. If not
 #'   given, a temporary directory is created
 #' @param prefix character prefix for the \code{big.matrix} filenames
@@ -171,7 +171,7 @@ stabilityGLM <- function(X, Y, weights = rep(1, nrow(X)), family = "gaussian", n
 #' selection. Journal of the Royal Statistical Society: Series B
 #' (Statistical Methodology), 72(4), 417–473.
 #'
-#' @seealso \code{\link[biglasso::biglasso-package]{biglasso-package}}
+#' @seealso \code{\link[biglasso]{biglasso-package}}
 #'
 #' @export
 stabilityBIG <- function(X, Y, family = "gaussian", n_subsample = 20, n_lambda = 100,
@@ -225,7 +225,7 @@ stabilityBIG <- function(X, Y, family = "gaussian", n_subsample = 20, n_lambda =
       ncores = ncores, lambda = full_fit$lambda, alpha = 1 - eps, warn = FALSE
     )
     if (length(partial_fit$lambda) < length_lambda) length_lambda <- length(partial_fit$lambda)
-    partial_coef <- as.matrix(coef(partial_fit, s = full_fit$lambda)[2:(dim(X)[2] + 1), 1:length_lambda])
+    partial_coef <- as.matrix(stats::coef(partial_fit, s = full_fit$lambda)[2:(dim(X)[2] + 1), 1:length_lambda])
     stab <- stab[1:length_lambda, ]
     stab <- stab + t(partial_coef != 0)
   }

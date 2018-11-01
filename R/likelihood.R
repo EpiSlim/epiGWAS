@@ -40,8 +40,8 @@ BOOST <- function(A, X, Y, ncores = 1) {
   # Internal function for computing the likelihood ratio statistic
   ratio <- function(z) {
     data_AX <- data.frame(x1 = factor(A), x2 = factor(z), y = Y)
-    fit01 <- glm(y ~ x1 + x2, family = "binomial", data = data_AX)
-    fit2 <- glm(y ~ x1 + x2 + x1 * x2, family = "binomial", data = data_AX)
+    fit01 <- stats::glm(y ~ x1 + x2, family = "binomial", data = data_AX)
+    fit2 <- stats::glm(y ~ x1 + x2 + x1 * x2, family = "binomial", data = data_AX)
 
     return(fit01$dev - fit2$dev)
   }

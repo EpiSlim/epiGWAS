@@ -19,7 +19,7 @@
 #' @param nY number of SNPs with marginal effects
 #' @param nZ12 nummber of SNP pairs with epistatic effects
 #' @param clusters vector of cluster memberships. Typically, the output
-#'   of \code{\link[stats::cutree]{cutree}}. For ease of identification,
+#'   of \code{\link[stats]{cutree}}. For ease of identification,
 #'   the SNP IDs in \code{names(clusters)} are mandatory.
 #' @param MAF vector of minor allele frequencies. The order of the SNPs in
 #'   \code{MAF} is identical to that in \code{clusters}.
@@ -142,11 +142,11 @@ gen_model <- function(nX, nY, nZ12, mean = rep(0, 4), sd = rep(1, 4)) {
 
   model <- list(
     syner = list(
-      A0 = rnorm(nX, mean = mean[[1]], sd = sd[[1]]),
-      A1 = rnorm(nX, mean = mean[[2]], sd = sd[[2]])
+      A0 = stats::rnorm(nX, mean = mean[[1]], sd = sd[[1]]),
+      A1 = stats::rnorm(nX, mean = mean[[2]], sd = sd[[2]])
     ),
-    marg = rnorm(nY, mean = mean[[3]], sd = sd[[3]]),
-    inter = rnorm(nZ12, mean = mean[[4]], sd = sd[[4]])
+    marg = stats::rnorm(nY, mean = mean[[3]], sd = sd[[3]]),
+    inter = stats::rnorm(nZ12, mean = mean[[4]], sd = sd[[4]])
   )
 
   return(model)
@@ -200,7 +200,7 @@ sim_phenotype <- function(X, causal, model, intercept = TRUE) {
     risk <- risk - mean(risk)
   }
 
-  phenotypes <- runif(dim(X)[1]) < (1 / (1 + exp(-risk)))
+  phenotypes <- stats::runif(dim(X)[1]) < (1 / (1 + exp(-risk)))
 
   return(phenotypes)
 }
@@ -215,7 +215,7 @@ sim_phenotype <- function(X, causal, model, intercept = TRUE) {
 #' them out for the estimate of the propensity scores.
 #'
 #' @param clusters vector of cluster memberships. Typically, the output
-#'   of \code{\link[stats::cutree]{cutree}}
+#'   of \code{\link[stats]{cutree}}
 #' @param center the target variant cluster
 #' @param k vector or integer. if \code{k} is a vector, it corresponds to
 #'   the cluster indices to be updated. Otherwise, \code{k} is an integer
@@ -229,7 +229,7 @@ sim_phenotype <- function(X, causal, model, intercept = TRUE) {
 #' @examples
 #' hc <- hclust(dist(USArrests))
 #' clusters <- cutree(hc, k = 10)
-#' merge.cluster(clusters, center=5, k=2)
+#' merge_cluster(clusters, center=5, k=2)
 #'
 #' @export
 merge_cluster <- function(clusters, center, k = 3) {

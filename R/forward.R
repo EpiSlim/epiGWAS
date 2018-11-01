@@ -109,10 +109,10 @@ forward <- function(X, p_init, p_trans, p_emit, ncores = 1) {
 #' Computes the propensity scores
 #'
 #' In this function, and for each sample, we compute both propensity scores
-#' \eqn{P(A=1\lvert X)}{P(A=1|X)} and \eqn{P(A=0\lvert X)}{P(A=0|X). The
+#' \eqn{P(A=1\lvert X)}{P(A=1|X)} and \eqn{P(A=0\lvert X)}{P(A=0|X)}. The
 #' application of the forward algorithm on the passed \code{hmm} allows us to
 #' estimate the joint probability of (A, X), for all values of the target
-#' variant {0, 1, 2}. The Bayes formula yields the corresponding conditional
+#' variant (0, 1, 2). The Bayes formula yields the corresponding conditional
 #' probabilities. Depending on the binarization rule, we combine them to
 #' obtain the propensity scores.
 #'
@@ -161,7 +161,6 @@ cond_prob <- function(X, target_name, hmm, binary = TRUE, ncores = 1) {
 #' is available from the following web page: \url{http://scheet.org/software.html}
 #'
 #' @param X genotype matrix
-#' @param target_name target variant ID
 #' @param out_path prefix for the fitted paramaters filenames. If \code{NULL},
 #'   the files are saved in a temporary directory.
 #' @param X_filename filename for the fastPHASE-formatted genotype file. If
@@ -171,7 +170,7 @@ cond_prob <- function(X, target_name, hmm, binary = TRUE, ncores = 1) {
 #' @param n_iter number of iterations for the EM algorithm
 #'
 #' @return fitted parameters of the fastPHASE HMM. They are grouped in a list
-#'   with the following fields: \code(pInit) for the initial marginal
+#'   with the following fields: \code{pInit} for the initial marginal
 #'   distribution, the three-dimensional array \code{Q} for the transition
 #'   probabilities and finally \code{pEmit}, another three-dimensional array
 #'   for the emission probabilities
