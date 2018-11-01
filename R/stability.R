@@ -208,7 +208,6 @@ stabilityBIG <- function(X, Y, family = "gaussian", n_subsample = 20, n_lambda =
   stab <- array(0, dim = c(length_lambda, dim(X)[2]))
 
   for (i in 1:n_subsample) {
-
     sink("/dev/null")
     sub_X_desc <- bigpca::big.select(
       X,

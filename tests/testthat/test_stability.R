@@ -31,8 +31,8 @@ test_that("stabilityGLM shortens the path if the model saturates", {
   weights <- runif(n)
 
   expect_type(stabilityGLM(X, Y, weights,
-                           family = "gaussian",
-                           lambda_min_ratio = 1e-5, short = TRUE
+    family = "gaussian",
+    lambda_min_ratio = 1e-5, short = TRUE
   ), "double")
 })
 
@@ -45,7 +45,7 @@ test_that("stabilityBIG correctly adapts to the length of the LASSO path", {
   Y <- rnorm(n)
 
   set.seed(468)
-  aucs_short <- stabilityBIG(X, Y,family = "gaussian", ncores = 3, short = TRUE)
+  aucs_short <- stabilityBIG(X, Y, family = "gaussian", ncores = 3, short = TRUE)
   set.seed(468)
   aucs_long <- stabilityBIG(X, Y, family = "gaussian", ncores = 3, short = FALSE)
 
@@ -61,7 +61,8 @@ test_that("stabilityBIG shortens the path if the model saturates", {
   Y <- rnorm(n)
   weights <- runif(n)
 
-  expect_type(stabilityBIG(X, Y, family = "gaussian", ncores = 3,
-                           lambda_min_ratio = 1e-5, short = TRUE
+  expect_type(stabilityBIG(X, Y,
+    family = "gaussian", ncores = 3,
+    lambda_min_ratio = 1e-5, short = TRUE
   ), "double")
 })

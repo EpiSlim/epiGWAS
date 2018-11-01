@@ -75,7 +75,6 @@ test_that("gen_model is not affected by the type of the arguments mean and sd", 
   input_vector <- gen_model(nX, nY, nZ12, mean = means, sd = sds)
 
   expect_identical(input_scalar, input_vector)
-
 })
 
 test_that("sim_phenotype is compatible with the whole pipeline", {
@@ -93,8 +92,8 @@ test_that("sim_phenotype is compatible with the whole pipeline", {
   n_samples <- 200
   p_thresh <- 0.4
   X <- matrix((runif(n_samples * length(clusters), min = 0, max = 1) < p_thresh) +
-                (runif(n_samples * length(clusters), min = 0, max = 1) < p_thresh),
-              ncol = length(clusters), nrow = n_samples
+    (runif(n_samples * length(clusters), min = 0, max = 1) < p_thresh),
+  ncol = length(clusters), nrow = n_samples
   )
   colnames(X) <- names(clusters)
 
@@ -104,7 +103,6 @@ test_that("sim_phenotype is compatible with the whole pipeline", {
   )
   model <- gen_model(nX, nY, nZ12, mean = rnorm(4), sd = runif(4, min = .5, max = 1.5))
   expect_type(sim_phenotype(X, causal, model, intercept = TRUE), "logical")
-
 })
 
 test_that("merge_cluster runs correctly for k as integer ", {

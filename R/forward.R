@@ -116,7 +116,7 @@ forward <- function(X, p_init, p_trans, p_emit, ncores = 1) {
 #' probabilities. Depending on the binarization rule, we combine them to
 #' obtain the propensity scores.
 #'
-#' @param X genotype matrix
+#' @param X genotype matrix. Make sure to assign \code{colnames(X)} beforehand.
 #' @param target_name target variant ID
 #' @param hmm prefix for the fitted paramaters filenames. If \code{NULL},
 #'   the files are saved in a temporary directory.
@@ -133,6 +133,7 @@ forward <- function(X, p_init, p_trans, p_emit, ncores = 1) {
 #'
 #' @export
 cond_prob <- function(X, target_name, hmm, binary = TRUE, ncores = 1) {
+  stopifnot(!is.null(colnames(X)))
   stopifnot(target_name %in% colnames(X))
   stopifnot(setequal(names(hmm), c("pInit", "Q", "pEmit")))
 
