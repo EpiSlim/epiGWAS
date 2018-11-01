@@ -44,18 +44,24 @@ OWL <- function(A, X, Y, propensity, ...) {
 
   stopifnot(
     setequal(levels(as.factor(A)), c(0, 1, 2)) |
-      setequal(levels(as.factor(A)), c(0, 1))
+      setequal(levels(as.factor(A)), c(0, 1)) | is.logical(A)
   )
 
   owl_X <- X
-  owl_Y <- (A > 0)
-  owl_weights <- ifelse(is.matrix(propensity),
-    as.numeric(Y) / propensity[cbind(1:length(Y), owl_Y + 1)],
+  if (is.logical(A)) {
+    owl_Y <- A
+  } else {
+    owl_Y <- (A > 0)
+  }
+  if (is.matrix(propensity)){
+    owl_weights <- as.numeric(Y) / propensity[cbind(1:length(Y), owl_Y + 1)]
+  } else {
     owl_weights <- as.numeric(Y) / propensity
-  )
+  }
+
   aucs <- do.call(
     stabilityGLM,
-    args = list(list(X = owl_X, Y = owl_Y, weights = owl_weights), owl_args)
+    args = append(list(X = owl_X, Y = owl_Y, weights = owl_weights), owl_args)
   )
 
   return(aucs)
@@ -113,13 +119,13 @@ modified_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
     mod_X <- X
     aucs <- do.call(
       stabilityBIG,
-      args = list(list(X = mod_X, Y = mod_Y), mod_args)
+      args = append(list(X = mod_X, Y = mod_Y), mod_args)
     )
   } else {
     mod_X <- bigmemory::as.big.matrix(X, shared = FALSE)
     aucs <- do.call(
       stabilityGLM,
-      args = list(list(X = mod_X, Y = mod_Y), mod_args)
+      args = append(list(X = mod_X, Y = mod_Y), mod_args)
     )
   }
 
@@ -163,25 +169,25 @@ normalized_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
   if (is.logical(Y)) Y <- 2 * as.numeric(Y) - 1
 
   propensity <- t(t(propensity) /
-    c(
-      sum(1 / (propensity[, 1][A == 0])),
-      sum(1 / (propensity[, 2][A > 0]))
-    ))
+                    c(
+                      sum(1 / (propensity[, 1][A == 0])),
+                      sum(1 / (propensity[, 2][A > 0]))
+                    ))
 
   norm_Y <- Y * ((A > 0) / propensity[, 2] -
-    (A == 0) / propensity[, 1])
+                   (A == 0) / propensity[, 1])
 
   if (parallel == TRUE) {
     norm_X <- X
     aucs <- do.call(
       stabilityBIG,
-      args = list(list(X = norm_X, Y = norm_Y), norm_args)
+      args = append(list(X = norm_X, Y = norm_Y), norm_args)
     )
   } else {
     norm_X <- bigmemory::as.big.matrix(X, shared = FALSE)
     aucs <- do.call(
       stabilityGLM,
-      args = list(list(X = norm_X, Y = norm_Y), norm_args)
+      args = append(list(X = norm_X, Y = norm_Y), norm_args)
     )
   }
 
@@ -226,19 +232,19 @@ shifted_outcome <- function(A, X, Y, propensity,
   if (is.logical(Y)) Y <- 2 * as.numeric(Y) - 1
 
   shift_Y <- Y * ((A > 0) / (propensity[, 2] + shift) -
-    (A == 0) / (propensity[, 1] + shift))
+                    (A == 0) / (propensity[, 1] + shift))
 
   if (parallel == TRUE) {
     shift_X <- X
     aucs <- do.call(
       stabilityBIG,
-      args = list(list(X = shift_X, Y = shift_Y), shift_args)
+      args = append(list(X = shift_X, Y = shift_Y), shift_args)
     )
   } else {
     shift_X <- bigmemory::as.big.matrix(X, shared = FALSE)
     aucs <- do.call(
       stabilityGLM,
-      args = list(list(X = shift_X, Y = shift_Y), shift_args)
+      args = append(list(X = shift_X, Y = shift_Y), shift_args)
     )
   }
 
@@ -294,29 +300,29 @@ robust_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
     sum(((as.numeric(A == 0) - propensity[, 1]) / propensity[, 1])^2)
 
   propensity <- (propensity - matrix(rep(c(C0, C1), each = length(A)),
-    ncol = 2
+                                     ncol = 2
   )) / (propensity**2)
 
   propensity <- t(t(propensity) /
-    c(
-      sum(1 / (propensity[, 1][A == 0])),
-      sum(1 / (propensity[, 2][A > 0]))
-    ))
+                    c(
+                      sum(1 / (propensity[, 1][A == 0])),
+                      sum(1 / (propensity[, 2][A > 0]))
+                    ))
 
   robust_Y <- Y * ((A > 0) / propensity[, 2] -
-    (A == 0) / propensity[, 1])
+                     (A == 0) / propensity[, 1])
 
   if (parallel == TRUE) {
     robust_X <- X
     aucs <- do.call(
       stabilityBIG,
-      args = list(list(X = robust_X, Y = robust_Y), robust_args)
+      args = append(list(X = robust_X, Y = robust_Y), robust_args)
     )
   } else {
     robust_X <- bigmemory::as.big.matrix(X, shared = FALSE)
     aucs <- do.call(
       stabilityGLM,
-      args = list(list(X = robust_X, Y = robust_Y), robust_args)
+      args = append(list(X = robust_X, Y = robust_Y), robust_args)
     )
   }
 
