@@ -30,18 +30,13 @@ test_that("stabilityGLM shortens the path if the model saturates", {
   Y <- rnorm(n)
   weights <- runif(n)
 
-  expect_type(stabilityGLM(X, Y, weights,
-    family = "gaussian",
-    lambda_min_ratio = 1e-5, short = TRUE
-  ), "double")
+  expect_type(stabilityGLM(X, Y, weights, family = "gaussian", lambda_min_ratio = 1e-05, short = TRUE), "double")
 })
 
 test_that("stabilityBIG correctly adapts to the length of the LASSO path", {
   n <- 200
   p <- 50
-  X <- bigmemory::as.big.matrix(
-    matrix(runif(n * p, min = 0, max = 1), nrow = n, ncol = p)
-  )
+  X <- bigmemory::as.big.matrix(matrix(runif(n * p, min = 0, max = 1), nrow = n, ncol = p))
   Y <- rnorm(n)
 
   set.seed(468)
@@ -55,14 +50,9 @@ test_that("stabilityBIG correctly adapts to the length of the LASSO path", {
 test_that("stabilityBIG shortens the path if the model saturates", {
   n <- 200
   p <- 50
-  X <- bigmemory::as.big.matrix(
-    matrix(runif(n * p, min = 0, max = 1), nrow = n, ncol = p)
-  )
+  X <- bigmemory::as.big.matrix(matrix(runif(n * p, min = 0, max = 1), nrow = n, ncol = p))
   Y <- rnorm(n)
   weights <- runif(n)
 
-  expect_type(stabilityBIG(X, Y,
-    family = "gaussian", ncores = 3,
-    lambda_min_ratio = 1e-5, short = TRUE
-  ), "double")
+  expect_type(stabilityBIG(X, Y, family = "gaussian", ncores = 3, lambda_min_ratio = 1e-05, short = TRUE), "double")
 })

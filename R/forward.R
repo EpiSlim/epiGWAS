@@ -18,15 +18,13 @@
 #' makes use of the LogSumExp transformation for increased
 #' numerical stability.
 #'
-#' @references Rabiner, Lawrence R. "A tutorial on hidden Markov models
-#' and selected applications in speech recognition." Proceedings of the
+#' @references Rabiner, Lawrence R. 'A tutorial on hidden Markov models
+#' and selected applications in speech recognition.' Proceedings of the
 #' IEEE 77.2 (1989): 257-286.
 #'
 #' @export
 forward_sample <- function(x, p_init, p_trans, p_emit) {
-  stopifnot(
-    (length(dim(p_trans)) == 3) & (length(dim(p_emit)) == 3) & is.vector(p_init)
-  )
+  stopifnot((length(dim(p_trans)) == 3) & (length(dim(p_emit)) == 3) & is.vector(p_init))
   stopifnot(length(x) == (dim(p_trans)[1] + 1))
   stopifnot(length(p_init) == dim(p_trans)[2])
   stopifnot(dim(p_trans)[2] == dim(p_trans)[3])
@@ -36,11 +34,8 @@ forward_sample <- function(x, p_init, p_trans, p_emit) {
 
   mat_one <- array(1, dim = rep(length(p_init), 2))
   p_obs <- log(p_init) + log(p_emit[1, x[1] + 1, ])
-  for (i in 2:length(x)) {
-    p_obs <- matrixStats::rowLogSumExps(
-      log(t(p_trans[i - 1, , ])) + mat_one %*% diag(p_obs)
-    ) +
-      log(p_emit[i, x[i] + 1, ])
+  for (i in seq(2, length(x))) {
+    p_obs <- matrixStats::rowLogSumExps(log(t(p_trans[i - 1, , ])) + mat_one %*% diag(p_obs)) + log(p_emit[i, x[i] + 1, ])
   }
 
   return(matrixStats::logSumExp(p_obs))
@@ -62,16 +57,14 @@ forward_sample <- function(x, p_init, p_trans, p_emit) {
 #'
 #' @return a vector of log probabilities
 #'
-#' @references Rabiner, Lawrence R. "A tutorial on hidden Markov models
-#' and selected applications in speech recognition." Proceedings of the
+#' @references Rabiner, Lawrence R. 'A tutorial on hidden Markov models
+#' and selected applications in speech recognition.' Proceedings of the
 #' IEEE 77.2 (1989): 257-286.
 #'
 #' @export
 forward <- function(X, p_init, p_trans, p_emit, ncores = 1) {
   stopifnot(ncores <= parallel::detectCores())
-  stopifnot(
-    (length(dim(p_trans)) == 3) | (length(dim(p_emit)) == 3) | is.vector(p_emit)
-  )
+  stopifnot((length(dim(p_trans)) == 3) | (length(dim(p_emit)) == 3) | is.vector(p_emit))
   stopifnot(dim(X)[2] == (dim(p_trans)[1] + 1))
   stopifnot(length(p_init) == dim(p_trans)[2])
   stopifnot(dim(p_trans)[2] == dim(p_trans)[3])
@@ -80,26 +73,19 @@ forward <- function(X, p_init, p_trans, p_emit, ncores = 1) {
   stopifnot(dim(p_emit)[2] == 3)
 
   if (ncores == 1) {
-    p_obs <- apply(
-      X, 1, function(z) return(forward_sample(z, p_init, p_trans, p_emit))
-    )
+    p_obs <- apply(X, 1, function(z) return(forward_sample(z, p_init, p_trans, p_emit)))
   } else {
     if (requireNamespace("doSNOW", quietly = TRUE)) {
       cl <- snow::makeCluster(ncores)
       snow::clusterExport(cl, "forward_sample")
       doSNOW::registerDoSNOW(cl)
 
-      p_obs <- parallel::parApply(
-        cl, X, 1,
-        function(z) return(forward_sample(z, p_init, p_trans, p_emit))
-      )
+      p_obs <- parallel::parApply(cl, X, 1, function(z) return(forward_sample(z, p_init, p_trans, p_emit)))
 
       snow::stopCluster(cl)
     } else {
       warning("Multithreading requires the installation of the doSNOW package")
-      p_obs <- apply(
-        X, 1, function(z) return(forward_sample(z, p_init, p_trans, p_emit))
-      )
+      p_obs <- apply(X, 1, function(z) return(forward_sample(z, p_init, p_trans, p_emit)))
     }
   }
 
@@ -189,19 +175,14 @@ cond_prob <- function(X, target_name, hmm, binary = TRUE, ncores = 1) {
 #'
 #'
 #' @export
-fast_HMM <- function(X, out_path = NULL, X_filename = NULL,
-                     fp_path = "bin/fastPHASE", n_state = 12, n_iter = 25) {
+fast_HMM <- function(X, out_path = NULL, X_filename = NULL, fp_path = "bin/fastPHASE", n_state = 12, n_iter = 25) {
   if (!file.exists(fp_path)) {
     stop("Please download the fastPHASE executable to the indicated fp_path")
   }
 
   # Fitting fastPHASE Hidden Markov Model
   Xinp_file <- SNPknock::SNPknock.fp.writeX(X, out_file = X_filename)
-  fp_out_path <- SNPknock::SNPknock.fp.runFastPhase(
-    fp_path, Xinp_file,
-    K = n_state,
-    numit = n_iter, out_path = out_path
-  )
+  fp_out_path <- SNPknock::SNPknock.fp.runFastPhase(fp_path, Xinp_file, K = n_state, numit = n_iter, out_path = out_path)
 
   # Loading the fitted Hidden Markov Model
   r_file <- paste(fp_out_path, "_rhat.txt", sep = "")
