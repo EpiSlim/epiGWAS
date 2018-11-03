@@ -1,0 +1,149 @@
+---
+title: "Robust epistasis detection with epiGWAS"
+author: "Lotfi Slim"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+bibliography: bibliography.bib
+vignette: >
+  %\VignetteIndexEntry{Robust epistasis detection with epiGWAS}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+<style>
+body {
+text-align: justify}
+</style>
+
+In this vignette, we cover the epistasis detection methods implemented in this package. The methods can be partitioned into two main categories: modified outcome and outcome weighted learning. Both methods recover the pure epistatic interactions with a predetermined variant, referred to as the `target`. The `target` can be drawn from the literature, experiments or top
+hits in previous GWAS. Narrowing the scope around a single variant is made possible by propensity scores [@rosenbaum1983] which, for genomic data, model the linkage disequilibrium (LD) dependency between the `target` and neighboring variants. We include them differently in outcome weighted learning and modified outcome in order to identify the SNPs interacting with $A$.
+
+The methods are briefly reviewed in this vignette before showcasing their performace on a simulated genotypic dataset. For more details, we refer the prospective user to [@Slim2018]. 
+
+## Phenotype-genotype decomposition
+We first consider a triplet of random variables $\left(X, A, Y\right)$:
+
+* $Y$ denotes a binary (*e.g.* in case-control studies) or discrete phenotype. 
+* $X= \left(X_1,\cdots, X_p\right) \in \lbrace 0, 1, 2\rbrace$ represents a genotype with $p$ single-nucleotide polymorphisms (SNPs). 
+* $A$ is a $(p+1)$-SNP that is encoded as $\lbrace -1, +1\rbrace$. Let $\underline{A} = (A+1)/2$ be a second binarized version of $A$ with values in $\lbrace 0,+1\rbrace$. Depending on the binarization rule fpr $\lbrace 0, 1, 2\rbrace$, we can model both dominant and recessive mechanisms.
+
+The symmetric encoding of $A$ allows the following genotype-phenotype decomposition:
+$$
+Y = \mu(X) + \delta(X)\times A + \epsilon,
+$$
+where $\epsilon$ is a zero mean random variable and
+$$
+\left\{
+\begin{aligned}
+	\mu (X) &= \frac{1}{2}\left[\mathbb{E}(Y\lvert A=+1,X)+\mathbb{E}(Y\lvert A=-1,X)\right] \,,\\
+    \delta (X) &= \frac{1}{2}\left[\mathbb{E}(Y\lvert A=+1,X)-\mathbb{E}(Y\lvert A=-1,X)\right] \,.
+\end{aligned}
+\right.
+$$
+
+The above decomposition separates $\mu(X)$, the main effects term of the SNPs within $X$ from $\delta(X)$ which models their pure epistatic effects with the `target`  SNP $A$. Under a sparsity assumption for $\delta(X)$, detecting epistasis amounts to the recovery of the support of $\delta(X)$. However, for a given sample, we only observe one of the two possibilities $A = +1$ or $A = -1$, making impossible the direct estimate of the term $\delta(X)$. To overcome this problem, we make use of the propensity score $\pi(A\lvert X)$. Mathematically speaking, it corresponds to the conditional probability of $A$ given $X$. In our case, where $A$ and $X$ are SNPs, $\pi(A\lvert X)$ models the LD between $A$ and $X$. The first category of methods, that we call modified outcome, incorporate $\pi(A\lvert X)$ in the outcome. The second category, outcome weighted learning, includes them in the sample weights along with the phenotype $Y$. Both categories are penalized regression approaches to which apply a stability selection procedure [@Meinshausen2010] for supprt estimation. 
+
+## Modified outcome
+In modified outcome, we substitute $A$ with $\underline{A}$ to rewrite $\delta(X)$ in the following way: 
+$$
+\delta(X) = \mathbb{E} \left[Y\left(\frac{\underline{A}}{\pi(\underline{A}=1\lvert X)} - \frac{1 - \underline{A}}{\pi(\underline{A}=0\lvert X)}\right)\Bigg\lvert X\right]
+$$
+
+Let $\underline{Y}$ denote the modified outcome: 
+$$
+\underline{Y} = Y\left(\frac{\underline{A}}{\pi(\underline{A}=1\lvert X)} - \frac{1 - \underline{A}}{\pi(\underline{A}=0\lvert X)}\right)
+$$
+
+The risk difference term $\delta(X)$ is then simplified to: 
+$$
+\delta(X) = \frac{1}{2}\mathbb{E}\left[\underline{Y}\lvert X\right]
+$$
+
+We can then recover the support of $\delta(X)$ by applying a model selection procedure to the penalized regression model where the sample covariates are $X$ and the outcome is $\underline{Y}$. However, in case of misspecification of the propensity score, modified selection may suffer from numerical instability. We therefore propose three extensions to help mitigate that. The first extension is shifted modified outcome and consists in the addition of a regularization term $\xi$ to the inverses of the propensity scores *i.e.* $1/(\pi(A\lvert X) + \xi)$. The second proposition, normalized modified outcome, normalizes $\underline{A}/\pi(\underline{A} = 1\lvert X)$ and $(1-\underline{A})/\pi(\underline{A} = 0\lvert X)$ respectively by their sums, $\sum_{i=1}^{n} \dfrac{\underline{A}^{(i)}}{\pi(\underline{A}^{(i)} = 1\lvert X^{(i)})}$ and $\sum_{i=1}^{n} \dfrac{1-\underline{A}^{(i)}}{\pi(\underline{A}^{(i)} = 0\lvert X^{(i)})}$. The last but certainly not least proposition is robust modified outcome (formula not shown here) [@Lunceford2004]. In extensive simulations [@Slim2018], it outperformed not only the other approaches within the modified outcome family, but also BOOST [@Wan2010], a state-of-the-art method for epistasis detection. 
+
+## Outcome weighted learning
+
+In outcome weighted learning, instead of the estimation of the diffrence of $\mathbb{E}(Y\lvert A = +1, X)$ and $\mathbb{E}(Y\lvert A = -1, X)$, we predict their $\log$-ratio:  
+
+$$
+d(X) = \ln \frac{\mathbb{E}(Y\lvert A = +1, X)}{\mathbb{E}(Y\lvert A = +1, X)}
+$$
+
+The verification of $\text{sign}\; \delta(X) = \text{sign}\; d(X)$ is straightforward. That makes outcome weighted learning a relaxation of modified outcome. Nonetheless, the regression model is completely different.  Outcome weighted learning is a weighted binary classification problem where the sample weights are $Y/\pi(A\lvert X)$, the outcome is the target $A$ and the covariates remain $X$.  Without regularization, the inverses of the propensity scores can also result in numerical instability. 
+
+## Case study
+Now that the theoretical groundings of our methods are clear, we explain how to use them in practice for epistasis detection. For that purpose, we illustrate them on a synthetic dataset included with this package. Using the HAPGEN2 [@Su2011] software, we simulated $a$ SNPs on the $22^{nd}$ chromosome between the nucleotide positions and in the GRCh37 coordinates.  The prior QC steps to control for rare variants ($\text{MAF} < 0.01$) and the Hardy–Weinberg equilibrium have already been performed. The simulated genotypes matrix is saved in the SnpMatrix format. 
+
+The first step in the pipeline is to load the epiGWAS package and the genotypes matrix. 
+
+```{r}
+require("epiGWAS")
+data(X)
+```
+
+Sampling
+hierarchical clustering 
+Filtering
+estimate of the propensity socre
+
+pick amplitude
+phenotype simulation 
+
+run the methods in a parallel fashion 
+
+## Benchmarking
+
+Rough explanation of the boost method
+
+code section to run boost here 
+
+```{r}
+require("precrec")
+```
+
+## Styles
+
+The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
+
+    output: 
+      rmarkdown::html_vignette:
+        css: mystyles.css
+
+## Figures
+
+The figure sizes have been customised so that you can easily put two images side-by-side. 
+
+```{r, fig.show='hold'}
+plot(1:10)
+plot(10:1)
+```
+
+You can enable figure captions by `fig_caption: yes` in YAML:
+
+    output:
+      rmarkdown::html_vignette:
+        fig_caption: yes
+
+Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+
+## More Examples
+
+You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+
+```{r, echo=FALSE, results='asis'}
+knitr::kable(head(mtcars, 10))
+```
+
+Also a quote using `>`:
+
+> "He who gives up [code] safety for [code] speed deserves neither."
+([via](https://twitter.com/hadleywickham/status/504368538874703872))
+
+## References
