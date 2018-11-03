@@ -24,21 +24,23 @@
 #'
 #' @export
 forward_sample <- function(x, p_init, p_trans, p_emit) {
-  stopifnot((length(dim(p_trans)) == 3) & (length(dim(p_emit)) == 3) & is.vector(p_init))
-  stopifnot(length(x) == (dim(p_trans)[1] + 1))
-  stopifnot(length(p_init) == dim(p_trans)[2])
-  stopifnot(dim(p_trans)[2] == dim(p_trans)[3])
-  stopifnot(dim(p_trans)[2] == dim(p_emit)[3])
-  stopifnot((dim(p_trans)[1] + 1) == dim(p_emit)[1])
-  stopifnot(dim(p_emit)[2] == 3)
+    stopifnot((length(dim(p_trans)) == 3) & (length(dim(p_emit)) == 3) &
+        is.vector(p_init))
+    stopifnot(length(x) == (dim(p_trans)[1] + 1))
+    stopifnot(length(p_init) == dim(p_trans)[2])
+    stopifnot(dim(p_trans)[2] == dim(p_trans)[3])
+    stopifnot(dim(p_trans)[2] == dim(p_emit)[3])
+    stopifnot((dim(p_trans)[1] + 1) == dim(p_emit)[1])
+    stopifnot(dim(p_emit)[2] == 3)
 
-  mat_one <- array(1, dim = rep(length(p_init), 2))
-  p_obs <- log(p_init) + log(p_emit[1, x[1] + 1, ])
-  for (i in seq(2, length(x))) {
-    p_obs <- matrixStats::rowLogSumExps(log(t(p_trans[i - 1, , ])) + mat_one %*% diag(p_obs)) + log(p_emit[i, x[i] + 1, ])
-  }
+    mat_one <- array(1, dim = rep(length(p_init), 2))
+    p_obs <- log(p_init) + log(p_emit[1, x[1] + 1, ])
+    for (i in seq(2, length(x))) {
+        p_obs <- matrixStats::rowLogSumExps(log(t(p_trans[i - 1, , ])) +
+            mat_one %*% diag(p_obs)) + log(p_emit[i, x[i] + 1, ])
+    }
 
-  return(matrixStats::logSumExp(p_obs))
+    return(matrixStats::logSumExp(p_obs))
 }
 
 #' Applies the forward algorithm to a genotype dataset
@@ -63,33 +65,37 @@ forward_sample <- function(x, p_init, p_trans, p_emit) {
 #'
 #' @export
 forward <- function(X, p_init, p_trans, p_emit, ncores = 1) {
-  stopifnot(ncores <= parallel::detectCores())
-  stopifnot((length(dim(p_trans)) == 3) | (length(dim(p_emit)) == 3) | is.vector(p_emit))
-  stopifnot(dim(X)[2] == (dim(p_trans)[1] + 1))
-  stopifnot(length(p_init) == dim(p_trans)[2])
-  stopifnot(dim(p_trans)[2] == dim(p_trans)[3])
-  stopifnot(dim(p_trans)[2] == dim(p_emit)[3])
-  stopifnot((dim(p_trans)[1] + 1) == dim(p_emit)[1])
-  stopifnot(dim(p_emit)[2] == 3)
+    stopifnot(ncores <= parallel::detectCores())
+    stopifnot((length(dim(p_trans)) == 3) | (length(dim(p_emit)) == 3) |
+        is.vector(p_emit))
+    stopifnot(dim(X)[2] == (dim(p_trans)[1] + 1))
+    stopifnot(length(p_init) == dim(p_trans)[2])
+    stopifnot(dim(p_trans)[2] == dim(p_trans)[3])
+    stopifnot(dim(p_trans)[2] == dim(p_emit)[3])
+    stopifnot((dim(p_trans)[1] + 1) == dim(p_emit)[1])
+    stopifnot(dim(p_emit)[2] == 3)
 
-  if (ncores == 1) {
-    p_obs <- apply(X, 1, function(z) return(forward_sample(z, p_init, p_trans, p_emit)))
-  } else {
-    if (requireNamespace("doSNOW", quietly = TRUE)) {
-      cl <- snow::makeCluster(ncores)
-      snow::clusterExport(cl, "forward_sample")
-      doSNOW::registerDoSNOW(cl)
-
-      p_obs <- parallel::parApply(cl, X, 1, function(z) return(forward_sample(z, p_init, p_trans, p_emit)))
-
-      snow::stopCluster(cl)
+    if (ncores == 1) {
+        p_obs <- apply(X, 1, function(z) return(forward_sample(z, p_init,
+            p_trans, p_emit)))
     } else {
-      warning("Multithreading requires the installation of the doSNOW package")
-      p_obs <- apply(X, 1, function(z) return(forward_sample(z, p_init, p_trans, p_emit)))
-    }
-  }
+        if (requireNamespace("doSNOW", quietly = TRUE)) {
+            cl <- snow::makeCluster(ncores)
+            snow::clusterExport(cl, "forward_sample")
+            doSNOW::registerDoSNOW(cl)
 
-  return(p_obs)
+            p_obs <- parallel::parApply(cl, X, 1, function(z) return(forward_sample(z,
+                p_init, p_trans, p_emit)))
+
+            snow::stopCluster(cl)
+        } else {
+            warning("Multithreading requires the installation of the doSNOW package")
+            p_obs <- apply(X, 1, function(z) return(forward_sample(z, p_init,
+                p_trans, p_emit)))
+        }
+    }
+
+    return(p_obs)
 }
 
 #' Computes the propensity scores
@@ -119,27 +125,29 @@ forward <- function(X, p_init, p_trans, p_emit, ncores = 1) {
 #'
 #' @export
 cond_prob <- function(X, target_name, hmm, binary = TRUE, ncores = 1) {
-  stopifnot(!is.null(colnames(X)))
-  stopifnot(target_name %in% colnames(X))
-  stopifnot(setequal(names(hmm), c("pInit", "Q", "pEmit")))
+    stopifnot(!is.null(colnames(X)))
+    stopifnot(target_name %in% colnames(X))
+    stopifnot(setequal(names(hmm), c("pInit", "Q", "pEmit")))
 
-  # Computing the propensity scores with the forward algorithm
-  p_obs <- matrix(nrow = nrow(X), ncol = 3)
-  X[, target_name] <- 0
-  p_obs[, 1] <- forward(X, hmm$pInit, hmm$Q, hmm$pEmit)
-  X[, target_name] <- 1
-  p_obs[, 2] <- forward(X, hmm$pInit, hmm$Q, hmm$pEmit)
-  X[, target_name] <- 2
-  p_obs[, 3] <- forward(X, hmm$pInit, hmm$Q, hmm$pEmit)
-  p_obs <- t(apply(p_obs, 1, function(x) return(x - matrixStats::logSumExp(x))))
+    # Computing the propensity scores with the forward algorithm
+    p_obs <- matrix(nrow = nrow(X), ncol = 3)
+    X[, target_name] <- 0
+    p_obs[, 1] <- forward(X, hmm$pInit, hmm$Q, hmm$pEmit)
+    X[, target_name] <- 1
+    p_obs[, 2] <- forward(X, hmm$pInit, hmm$Q, hmm$pEmit)
+    X[, target_name] <- 2
+    p_obs[, 3] <- forward(X, hmm$pInit, hmm$Q, hmm$pEmit)
+    p_obs <- t(apply(p_obs, 1, function(x) return(x - matrixStats::logSumExp(x))))
 
-  if (binary) {
-    propensity <- cbind(exp(p_obs[, 1]), exp(p_obs[, 2]) + exp(p_obs[, 3]))
-  } else {
-    propensity <- cbind(exp(p_obs[, 1]) + exp(p_obs[, 2]), exp(p_obs[, 3]))
-  }
+    if (binary) {
+        propensity <- cbind(exp(p_obs[, 1]), exp(p_obs[, 2]) + exp(p_obs[,
+            3]))
+    } else {
+        propensity <- cbind(exp(p_obs[, 1]) + exp(p_obs[, 2]), exp(p_obs[,
+            3]))
+    }
 
-  return(propensity)
+    return(propensity)
 }
 
 #' In this function, we fit the fastPHASE hidden Markov model using the EM
@@ -175,21 +183,25 @@ cond_prob <- function(X, target_name, hmm, binary = TRUE, ncores = 1) {
 #'
 #'
 #' @export
-fast_HMM <- function(X, out_path = NULL, X_filename = NULL, fp_path = "bin/fastPHASE", n_state = 12, n_iter = 25) {
-  if (!file.exists(fp_path)) {
-    stop("Please download the fastPHASE executable to the indicated fp_path")
-  }
+fast_HMM <- function(X, out_path = NULL, X_filename = NULL, fp_path = "bin/fastPHASE",
+    n_state = 12, n_iter = 25) {
+    if (!file.exists(fp_path)) {
+        stop("Please download the fastPHASE executable to the indicated fp_path")
+    }
 
-  # Fitting fastPHASE Hidden Markov Model
-  Xinp_file <- SNPknock::SNPknock.fp.writeX(X, out_file = X_filename)
-  fp_out_path <- SNPknock::SNPknock.fp.runFastPhase(fp_path, Xinp_file, K = n_state, numit = n_iter, out_path = out_path)
+    # Fitting fastPHASE Hidden Markov Model
+    Xinp_file <- SNPknock::SNPknock.fp.writeX(X, out_file = X_filename)
+    fp_out_path <- SNPknock::SNPknock.fp.runFastPhase(fp_path, Xinp_file,
+        K = n_state, numit = n_iter, out_path = out_path)
 
-  # Loading the fitted Hidden Markov Model
-  r_file <- paste(fp_out_path, "_rhat.txt", sep = "")
-  theta_file <- paste(fp_out_path, "_thetahat.txt", sep = "")
-  alpha_file <- paste(fp_out_path, "_alphahat.txt", sep = "")
+    # Loading the fitted Hidden Markov Model
+    r_file <- paste(fp_out_path, "_rhat.txt", sep = "")
+    theta_file <- paste(fp_out_path, "_thetahat.txt", sep = "")
+    alpha_file <- paste(fp_out_path, "_alphahat.txt", sep = "")
+    char_file <- paste(fp_out_path, "_origchars", sep = "")
 
-  hmm <- SNPknock::SNPknock.fp.loadFit(r_file, theta_file, alpha_file, X[1, ])
+    hmm <- SNPknock::SNPknock.fp.loadFit(r_file, theta_file, alpha_file,
+                                         char_file)
 
-  return(hmm)
+    return(hmm)
 }

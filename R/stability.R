@@ -82,31 +82,55 @@ subsample <- function(n, size = n %/% 2, n_subsample) {
 #' @seealso \code{\link[glmnet]{glmnet-package}}
 #'
 #' @export
-stabilityGLM <- function(X, Y, weights = rep(1, nrow(X)), family = "gaussian", n_subsample = 20, n_lambda = 100, short = TRUE, lambda_min_ratio = 0.01, eps = 1e-05) {
+stabilityGLM <- function(X, Y, weights = rep(1, nrow(X)), family = "gaussian",
+                         n_subsample = 20, n_lambda = 100, short = TRUE, lambda_min_ratio = 0.01,
+                         eps = 1e-05) {
   stopifnot(family %in% c("gaussian", "binomial"))
   stopifnot(all(weights >= 0))
 
   idx <- subsample(length(Y), size = (length(Y) %/% 2), n_subsample = n_subsample)
 
-  full_fit <- glmnet::glmnet(x = X, y = Y, weights = weights, family = family, nlambda = n_lambda, lambda.min.ratio = 0.01, alpha = 1 - eps)
+  full_fit <- glmnet::glmnet(
+    x = X, y = Y, weights = weights, family = family,
+    nlambda = n_lambda, lambda.min.ratio = 0.01, alpha = 1 - eps
+  )
 
   if (length(full_fit$lambda) < n_lambda) {
-    full_fit <- glmnet::glmnet(x = X, y = Y, weights = weights, family = family, nlambda = n_lambda, alpha = 1 - eps, lambda.min.ratio = min(full_fit$lambda) / (0.99 * max(full_fit$lambda)))
+    full_fit <- glmnet::glmnet(
+      x = X, y = Y, weights = weights, family = family,
+      nlambda = n_lambda, alpha = 1 - eps, lambda.min.ratio = min(full_fit$lambda) / (0.99 *
+        max(full_fit$lambda))
+    )
   }
 
-  stab <- array(0, dim = c(n_lambda, ncol(X)))
+  length_lambda <- length(full_fit$lambda)
+  stab <- array(0, dim = c(length_lambda, dim(X)[2]))
 
   for (i in seq_len(n_subsample)) {
-    partial_fit <- glmnet::glmnet(x = X[idx[, i], ], y = Y[idx[, i]], weights = weights[idx[, i]], family = family, lambda = full_fit$lambda, alpha = 1 - eps)
-
-    partial_coef <- glmnet::coef.glmnet(partial_fit, s = full_fit$lambda)[-1, ]
+    partial_fit <- glmnet::glmnet(
+      x = X[idx[, i], ], y = Y[idx[, i]],
+      weights = weights[idx[, i]], family = family, lambda = full_fit$lambda,
+      alpha = 1 - eps
+    )
+    if (length(partial_fit$lambda) < length_lambda) {
+      length_lambda <- length(partial_fit$lambda)
+    }
+    partial_coef <- glmnet::coef.glmnet(partial_fit, s = full_fit$lambda)[seq_len(dim(X)[2]) +
+      1, seq_len(length_lambda)]
+    stab <- stab[seq_len(length_lambda), ]
     stab <- stab + (t(as.matrix(partial_coef)) != 0)
   }
-
+  
   stab <- stab / n_subsample
 
   aucs <- vapply(seq_len(ncol(X)), function(i) {
-    DescTools::AUC(x = seq_len((1 - short) * n_lambda + short * (n_lambda %/% 2)), y = stab[seq_len((1 - short) * n_lambda + short * (n_lambda %/% 2)), i])
+    DescTools::AUC(
+      x = seq_len((1 - short) * n_lambda + short * (n_lambda %/% 2)),
+      y = stab[
+        seq_len((1 - short) * n_lambda + short * (n_lambda %/% 2)),
+        i
+      ]
+    )
   }, double(1))
 
   return(aucs)
@@ -159,7 +183,9 @@ stabilityGLM <- function(X, Y, weights = rep(1, nrow(X)), family = "gaussian", n
 #' @seealso \code{\link[biglasso]{biglasso-package}}
 #'
 #' @export
-stabilityBIG <- function(X, Y, family = "gaussian", n_subsample = 20, n_lambda = 100, lambda_min_ratio = 0.01, eps = 1e-05, short = TRUE, ncores = 4, dir = tempdir(), prefix = "subX") {
+stabilityBIG <- function(X, Y, family = "gaussian", n_subsample = 20, n_lambda = 100,
+                         lambda_min_ratio = 0.01, eps = 1e-05, short = TRUE, ncores = 4, dir = tempdir(),
+                         prefix = "subX") {
   stopifnot(family %in% c("gaussian", "binomial"))
   stopifnot(bigmemory::is.big.matrix(X))
   stopifnot(dir.exists(dir))
@@ -170,11 +196,18 @@ stabilityBIG <- function(X, Y, family = "gaussian", n_subsample = 20, n_lambda =
 
   idx <- subsample(length(Y), size = (length(Y) %/% 2), n_subsample = n_subsample)
 
-  full_fit <- biglasso::biglasso(X = X, y = Y, penalty = "enet", family = family, nlambda = n_lambda, ncores = ncores, lambda.min = lambda_min_ratio, alpha = 1 - eps, warn = FALSE)
+  full_fit <- biglasso::biglasso(
+    X = X, y = Y, penalty = "enet", family = family,
+    nlambda = n_lambda, ncores = ncores, lambda.min = lambda_min_ratio,
+    alpha = 1 - eps, warn = FALSE
+  )
 
   if (length(full_fit$lambda) < n_lambda) {
-    full_fit <- biglasso::biglasso(X = X, y = Y, penalty = "enet", family = family, nlambda = n_lambda, ncores = ncores, lambda.min = min(full_fit$lambda) / (0.99 * max(full_fit$lambda)), alpha = 1 -
-      eps, warn = FALSE)
+    full_fit <- biglasso::biglasso(
+      X = X, y = Y, penalty = "enet", family = family,
+      nlambda = n_lambda, ncores = ncores, lambda.min = min(full_fit$lambda) / (0.99 *
+        max(full_fit$lambda)), alpha = 1 - eps, warn = FALSE
+    )
   }
 
   length_lambda <- length(full_fit$lambda)
@@ -182,16 +215,25 @@ stabilityBIG <- function(X, Y, family = "gaussian", n_subsample = 20, n_lambda =
 
   for (i in seq_len(n_subsample)) {
     sink("/dev/null")
-    sub_X_desc <- bigpca::big.select(X, select.rows = idx[, i], select.cols = seq_len(ncol(X)), delete.existing = TRUE, deepC = TRUE, dir = dir, pref = prefix, verbose = FALSE)
+    sub_X_desc <- bigpca::big.select(X,
+      select.rows = idx[, i], select.cols = seq_len(ncol(X)),
+      delete.existing = TRUE, deepC = TRUE, dir = dir, pref = prefix,
+      verbose = FALSE
+    )
     sink()
 
     sub_X <- bigpca::get.big.matrix(sub_X_desc)
     sub_X_shared <- bigmemory::deepcopy(sub_X, shared = FALSE, type = "double")
-    partial_fit <- biglasso::biglasso(X = sub_X_shared, y = Y[idx[, i]], penalty = "enet", family = family, ncores = ncores, lambda = full_fit$lambda, alpha = 1 - eps, warn = FALSE)
+    partial_fit <- biglasso::biglasso(
+      X = sub_X_shared, y = Y[idx[, i]],
+      penalty = "enet", family = family, ncores = ncores, lambda = full_fit$lambda,
+      alpha = 1 - eps, warn = FALSE
+    )
     if (length(partial_fit$lambda) < length_lambda) {
       length_lambda <- length(partial_fit$lambda)
     }
-    partial_coef <- as.matrix(stats::coef(partial_fit, s = full_fit$lambda)[seq_len(dim(X)[2]) + 1, seq_len(length_lambda)])
+    partial_coef <- as.matrix(stats::coef(partial_fit, s = full_fit$lambda)[seq_len(dim(X)[2]) +
+      1, seq_len(length_lambda)])
     stab <- stab[seq_len(length_lambda), ]
     stab <- stab + t(partial_coef != 0)
   }
@@ -203,7 +245,9 @@ stabilityBIG <- function(X, Y, family = "gaussian", n_subsample = 20, n_lambda =
   stab <- stab / n_subsample
 
   aucs <- vapply(seq_len(ncol(stab)), function(i) {
-    DescTools::AUC(x = seq_len((1 - short) * length_lambda + short * (length_lambda %/% 2)), y = stab[seq_len((1 - short) * length_lambda + short * (length_lambda %/% 2)), i])
+    DescTools::AUC(x = seq_len((1 - short) * length_lambda + short *
+      (length_lambda %/% 2)), y = stab[seq_len((1 - short) * length_lambda +
+      short * (length_lambda %/% 2)), i])
   }, double(1))
 
   return(aucs)

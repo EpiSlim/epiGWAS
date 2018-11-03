@@ -30,37 +30,37 @@
 #'
 #' @export
 BOOST <- function(A, X, Y, ncores = 1) {
-  stopifnot(ncores <= parallel::detectCores())
-  stopifnot(dim(X)[1] == length(A))
-  stopifnot(dim(X)[1] == length(Y))
-  stopifnot(setequal(levels(as.factor(A)), c(0, 1, 2)))
-  stopifnot(setequal(levels(as.factor(X)), c(0, 1, 2)))
-  stopifnot(is.factor(Y) | is.logical(Y))
+    stopifnot(ncores <= parallel::detectCores())
+    stopifnot(dim(X)[1] == length(A))
+    stopifnot(dim(X)[1] == length(Y))
+    stopifnot(setequal(levels(as.factor(A)), c(0, 1, 2)))
+    stopifnot(setequal(levels(as.factor(X)), c(0, 1, 2)))
+    stopifnot(is.factor(Y) | is.logical(Y))
 
-  # Internal function for computing the likelihood ratio statistic
-  ratio <- function(z) {
-    data_AX <- data.frame(x1 = factor(A), x2 = factor(z), y = Y)
-    fit01 <- stats::glm(y ~ x1 + x2, family = "binomial", data = data_AX)
-    fit2 <- stats::glm(y ~ x1 + x2 + x1 * x2, family = "binomial", data = data_AX)
+    # Internal function for computing the likelihood ratio statistic
+    ratio <- function(z) {
+        data_AX <- data.frame(x1 = factor(A), x2 = factor(z), y = Y)
+        fit01 <- stats::glm(y ~ x1 + x2, family = "binomial", data = data_AX)
+        fit2 <- stats::glm(y ~ x1 + x2 + x1 * x2, family = "binomial", data = data_AX)
 
-    return(fit01$dev - fit2$dev)
-  }
-
-  if (ncores == 1) {
-    loglikelihood <- apply(X, 2, ratio)
-  } else {
-    if (requireNamespace("doSNOW", quietly = TRUE)) {
-      cl <- snow::makeCluster(ncores)
-      doSNOW::registerDoSNOW(cl)
-
-      loglikelihood <- parallel::parApply(cl, X, 2, ratio)
-
-      snow::stopCluster(cl)
-    } else {
-      warning("Multithreading requires the installation of the doSNOW package")
-      loglikelihood <- apply(X, 2, ratio)
+        return(fit01$dev - fit2$dev)
     }
-  }
 
-  return(loglikelihood)
+    if (ncores == 1) {
+        loglikelihood <- apply(X, 2, ratio)
+    } else {
+        if (requireNamespace("doSNOW", quietly = TRUE)) {
+            cl <- snow::makeCluster(ncores)
+            doSNOW::registerDoSNOW(cl)
+
+            loglikelihood <- parallel::parApply(cl, X, 2, ratio)
+
+            snow::stopCluster(cl)
+        } else {
+            warning("Multithreading requires the installation of the doSNOW package")
+            loglikelihood <- apply(X, 2, ratio)
+        }
+    }
+
+    return(loglikelihood)
 }

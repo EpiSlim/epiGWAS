@@ -15,9 +15,22 @@ Description: Functions to perform robust epistasis detection in genome-wide
   recover the synergistic effects between the target and the genotype.
 Depends: R (>= 3.5.0)
 Imports: matrixStats, DescTools, glmnet, SNPknock
-Suggests: foreach, iterators, snow, doSNOW, snpStats, WGCNA, precrec, bigpca, bigmemory, biglasso,
-    testthat
+Suggests: 
+    foreach,
+    iterators,
+    snow,
+    doSNOW,
+    snpStats,
+    WGCNA,
+    precrec,
+    bigpca,
+    bigmemory,
+    biglasso,
+    testthat,
+    knitr,
+    rmarkdown
 License: GPL (>=2)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.0.9000
+VignetteBuilder: knitr
