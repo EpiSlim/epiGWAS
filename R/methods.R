@@ -2,7 +2,7 @@
 #'
 #' To recover the synergistic interactions between the target \code{A} and the
 #' rest of the genotype \code{X}, \code{OWL} formulates a weighted binary
-#' classification problem. The outcome is the mapping of\code{A} to \{0,1\}. The
+#' classification problem. The outcome is the mapping of \code{A} to \{0,1\}. The
 #' covariates are \code{X}. The propensity scores and the phenotypes are
 #' combined in the sample weights \eqn{Y/\pi(A\lvert X)}{Y/P(A|X)}. For binary
 #' phenotypes, OWL is a case-only approach. The approach also accommodates
@@ -70,7 +70,7 @@ OWL <- function(A, X, Y, propensity, ...) {
 #' Implements the modified outcome approach
 #'
 #' In the modified outcome approach, we estimate the risk difference
-#' \eqn{\mathbb{E}\left[Y\lvert A=1,X\right]-\mathbb{E}\left[Y\lvert A=0,X\right]}.
+#' \eqn{\mathbb{E}\left[Y\lvert A=1,X\right]-\mathbb{E}\left[Y\lvert A=0,X\right]}{E[Y|A=1,X]-E[Y|A=0,X]}.
 #' The risk difference measures the synergy between \code{A} and the set of
 #' covariates in \code{X}. For genome-wide associtation studies, it can be
 #' understood as a pure epistatic term. For a single sample, we only
@@ -199,7 +199,7 @@ normalized_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
 #' instability due to low propensity scores values. More precisely, the
 #' inverses of the propensity scores are
 #' \eqn{1/(\pi(A\lvert X) + \xi)}{1/(P(A|X) + shift)}. We recommend keeping
-#' the parameter\eqn{\xi}{shift} to its default value of 0.1.
+#' the parameter \eqn{\xi}{shift} to its default value of 0.1.
 #'
 #' @param A target variant
 #' @param X rest of the genotype
@@ -256,7 +256,7 @@ shifted_outcome <- function(A, X, Y, propensity, shift = 0.1, parallel = FALSE,
 #' Except for the heuristic \code{shifted_outcome}, all of
 #' the modified outcome approaches belong to a parameterized class of unbiased
 #' estimators for the risk difference term
-#' \eqn{\mathbb{E}\left[Y\lvert A=1,X\right]-\mathbb{E}\left[Y\lvert A=0,X\right]}.
+#' \eqn{\mathbb{E}\left[Y\lvert A=1,X\right]-\mathbb{E}\left[Y\lvert A=0,X\right]}{E[Y|A=1,X]-E[Y|A=0,X]}.
 #' Robust modified outcome is the approach with the least large-sample variance
 #' within that class.
 #' This theoretical grounding is consistent with the observed superior performance

@@ -63,8 +63,8 @@ subsample <- function(n, size = n %/% 2, n_subsample) {
 #' curves
 #'
 #' @details For a fixed \eqn{\lambda}{lambda},
-#' the L2 penalization is \eqn{\lambda \times eps}{lambda \times eps}, while
-#' the L1 penalization is \eqn{\lambda \times (1-eps)}{lambda \times (1-eps)}.
+#' the L2 penalization is \eqn{\lambda \times eps}{lambda * eps}, while
+#' the L1 penalization is \eqn{\lambda \times (1-eps)}{lambda * (1-eps)}.
 #' The goal of L2 penalization is just to ensure the uniqueness of the
 #' solution. For that reason, we recommend setting eps << 1.
 #'
@@ -120,7 +120,7 @@ stabilityGLM <- function(X, Y, weights = rep(1, nrow(X)), family = "gaussian",
     stab <- stab[seq_len(length_lambda), ]
     stab <- stab + (t(as.matrix(partial_coef)) != 0)
   }
-  
+
   stab <- stab / n_subsample
 
   aucs <- vapply(seq_len(ncol(X)), function(i) {

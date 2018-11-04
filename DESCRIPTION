@@ -28,7 +28,8 @@ Suggests:
     biglasso,
     testthat,
     knitr,
-    rmarkdown
+    rmarkdown,
+    kableExtra
 License: GPL (>=2)
 Encoding: UTF-8
 LazyData: true
