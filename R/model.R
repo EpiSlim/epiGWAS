@@ -45,56 +45,58 @@
 #'
 #' @export
 sample_SNP <- function(nX, nY, nZ12, clusters, MAF, thresh_MAF = 0.2, window_size = 3,
-    overlap_marg = 0, overlap_inter = 0, max_iter = 10000) {
-    stopifnot((thresh_MAF > 0) & (thresh_MAF <= 0.5))
-    stopifnot(!is.null(names(clusters)))
-    stopifnot(length(clusters) == length(MAF))
-    stopifnot(overlap_marg + overlap_inter < nX)
-    stopifnot(overlap_marg < nY)
-    stopifnot(overlap_inter < nZ12)
+                       overlap_marg = 0, overlap_inter = 0, max_iter = 10000) {
+  stopifnot((thresh_MAF > 0) & (thresh_MAF <= 0.5))
+  stopifnot(!is.null(names(clusters)))
+  stopifnot(length(clusters) == length(MAF))
+  stopifnot(overlap_marg + overlap_inter < nX)
+  stopifnot(overlap_marg < nY)
+  stopifnot(overlap_inter < nZ12)
 
-    if (is.null(names(MAF))) {
-        names(MAF) <- names(clusters)
-    } else {
-        stopifnot(all(names(MAF) == names(clusters)))
+  if (is.null(names(MAF))) {
+    names(MAF) <- names(clusters)
+  } else {
+    stopifnot(all(names(MAF) == names(clusters)))
+  }
+  active <- rep(0, 1 + nX + nY + 2 * nZ12 - (overlap_marg + overlap_inter))
+  for (i in seq_along(active)) {
+    iter <- 0
+    cdt <- FALSE
+    while (cdt == FALSE) {
+      iter <- iter + 1
+      candidate_SNP <- sample.int(length(clusters), size = 1)
+      candidate_name <- names(clusters)[candidate_SNP]
+      cdt <- (MAF[candidate_SNP] > thresh_MAF)
+      if (i == 1) {
+        cluster_target <- clusters[candidate_name]
+      } else {
+        cdt <- cdt & (abs(clusters[candidate_name] - cluster_target) >
+          window_size)
+      }
+      if (iter > max_iter) {
+        stop("The MAF constraint can not be satisfied")
+      }
     }
-    active <- rep(0, 1 + nX + nY + 2 * nZ12 - (overlap_marg + overlap_inter))
-    for (i in seq_along(active)) {
-        iter <- 0
-        cdt <- FALSE
-        while (cdt == FALSE) {
-            iter <- iter + 1
-            candidate_SNP <- sample.int(length(clusters), size = 1)
-            candidate_name <- names(clusters)[candidate_SNP]
-            cdt <- (MAF[candidate_SNP] > thresh_MAF)
-            if (i == 1) {
-                cluster_target <- clusters[candidate_name]
-            } else {
-                cdt <- cdt & (abs(clusters[candidate_name] - cluster_target) >
-                  window_size)
-            }
-            if (iter > max_iter) {
-                stop("The MAF constraint can not be satisfied")
-            }
-        }
-        active[i] <- candidate_name
-        MAF <- subset(MAF, (clusters != clusters[candidate_SNP]))
-        clusters <- subset(clusters, (clusters != clusters[candidate_SNP]))
-    }
+    active[i] <- candidate_name
+    MAF <- subset(MAF, (clusters != clusters[candidate_SNP]))
+    clusters <- subset(clusters, (clusters != clusters[candidate_SNP]))
+  }
 
-    marg_idx <- sample.int(nX, overlap_marg)
-    if (overlap_marg == 0) {
-        inter_idx <- sample(seq_len(nX), overlap_inter)
-    } else {
-        inter_idx <- sample(seq_len(nX)[-marg_idx], overlap_inter)
-    }
-    SNP_list <- list(target = active[1], syner = active[seq_len(nX) + 1],
-        marginal = active[c(seq(nX + 2, nX + nY + 1 - overlap_marg), 1 +
-            marg_idx)], inter1 = active[c(seq(nX + nY + 2, nX + nY + nZ12 +
-            1 - overlap_inter) - overlap_marg, 1 + inter_idx)], inter2 = active[seq(nX +
-            nY + nZ12 + 2 - (overlap_marg + overlap_inter), length(active))])
+  marg_idx <- sample.int(nX, overlap_marg)
+  if (overlap_marg == 0) {
+    inter_idx <- sample(seq_len(nX), overlap_inter)
+  } else {
+    inter_idx <- sample(seq_len(nX)[-marg_idx], overlap_inter)
+  }
+  SNP_list <- list(
+    target = active[1], syner = active[seq_len(nX) + 1],
+    marginal = active[c(seq(nX + 2, nX + nY + 1 - overlap_marg), 1 +
+      marg_idx)], inter1 = active[c(seq(nX + nY + 2, nX + nY + nZ12 +
+      1 - overlap_inter) - overlap_marg, 1 + inter_idx)], inter2 = active[seq(nX +
+      nY + nZ12 + 2 - (overlap_marg + overlap_inter), length(active))]
+  )
 
-    return(SNP_list)
+  return(SNP_list)
 }
 
 #' Samples effect sizes for the disease model
@@ -124,23 +126,28 @@ sample_SNP <- function(nX, nY, nZ12, clusters, MAF, thresh_MAF = 0.2, window_siz
 #'
 #' @export
 gen_model <- function(nX, nY, nZ12, mean = rep(0, 4), sd = rep(1, 4)) {
-    stopifnot(length(mean) == 4)
-    stopifnot(length(sd) == 4)
-    if (is.list(mean)) {
-        stopifnot((length(mean[[1]]) == nX) | (length(mean[[2]]) == nX) |
-            (length(mean[[3]]) == nY) | (length(mean[[4]]) == nZ12))
-    }
-    if (is.list(sd)) {
-        stopifnot((length(sd[[1]]) == nX) | (length(sd[[2]]) == nX) | (length(sd[[3]]) ==
-            nY) | (length(sd[[4]]) == nZ12))
-    }
+  stopifnot(length(mean) == 4)
+  stopifnot(length(sd) == 4)
+  if (is.list(mean)) {
+    stopifnot((length(mean[[1]]) == nX) | (length(mean[[2]]) == nX) |
+      (length(mean[[3]]) == nY) | (length(mean[[4]]) == nZ12))
+  }
+  if (is.list(sd)) {
+    stopifnot((length(sd[[1]]) == nX) | (length(sd[[2]]) == nX) | (length(sd[[3]]) ==
+      nY) | (length(sd[[4]]) == nZ12))
+  }
 
-    model <- list(syner = list(A0 = stats::rnorm(nX, mean = mean[[1]], sd = sd[[1]]),
-        A1 = stats::rnorm(nX, mean = mean[[2]], sd = sd[[2]])), marg = stats::rnorm(nY,
-        mean = mean[[3]], sd = sd[[3]]), inter = stats::rnorm(nZ12, mean = mean[[4]],
-        sd = sd[[4]]))
+  model <- list(syner = list(
+    A0 = stats::rnorm(nX, mean = mean[[1]], sd = sd[[1]]),
+    A1 = stats::rnorm(nX, mean = mean[[2]], sd = sd[[2]])
+  ), marg = stats::rnorm(nY,
+    mean = mean[[3]], sd = sd[[3]]
+  ), inter = stats::rnorm(nZ12,
+    mean = mean[[4]],
+    sd = sd[[4]]
+  ))
 
-    return(model)
+  return(model)
 }
 
 #' Simulates a binary phenotye
@@ -165,28 +172,30 @@ gen_model <- function(nX, nY, nZ12, mean = rep(0, 4), sd = rep(1, 4)) {
 #'
 #' @export
 sim_phenotype <- function(X, causal, model, intercept = TRUE) {
-    stopifnot(!is.null(colnames(X)))
-    stopifnot(!(is.null(causal[["target"]]) | is.null(causal[["syner"]]) |
-        is.null(causal[["marginal"]]) | is.null(causal[["inter1"]]) | is.null(causal[["inter2"]])))
-    stopifnot(!(is.null(model[["syner"]][["A0"]]) | is.null(model[["syner"]][["A1"]]) |
-        is.null(model[["marg"]]) | is.null(model[["inter"]])))
-    stopifnot((length(causal[["syner"]]) == length(model[["syner"]][["A0"]])) &
-        (length(causal[["syner"]]) == length(model[["syner"]][["A1"]])) &
-        (length(causal[["marginal"]]) == length(model[["marg"]])) & (length(causal[["inter1"]]) ==
-        length(model[["inter"]])) & (length(causal[["inter2"]]) == length(model[["inter"]])))
+  stopifnot(!is.null(colnames(X)))
+  stopifnot(!(is.null(causal[["target"]]) | is.null(causal[["syner"]]) |
+    is.null(causal[["marginal"]]) | is.null(causal[["inter1"]]) | is.null(causal[["inter2"]])))
+  stopifnot(!(is.null(model[["syner"]][["A0"]]) | is.null(model[["syner"]][["A1"]]) |
+    is.null(model[["marg"]]) | is.null(model[["inter"]])))
+  stopifnot((length(causal[["syner"]]) == length(model[["syner"]][["A0"]])) &
+    (length(causal[["syner"]]) == length(model[["syner"]][["A1"]])) &
+    (length(causal[["marginal"]]) == length(model[["marg"]])) & (length(causal[["inter1"]]) ==
+    length(model[["inter"]])) & (length(causal[["inter2"]]) == length(model[["inter"]])))
 
-    risk <- (X[, causal$target] == 0) * (X[, causal$syner] %*% model$syner$A0) +
-        (X[, causal$target] > 0) * (X[, causal$syner] %*% model$syner$A1) +
-        (X[, causal$marginal] %*% model$marg) + (X[, causal$inter1] * X[,
-        causal$inter2]) %*% model$inter
+  risk <- (X[, causal$target] == 0) * (X[, causal$syner] %*% model$syner$A0) +
+    (X[, causal$target] > 0) * (X[, causal$syner] %*% model$syner$A1) +
+    (X[, causal$marginal] %*% model$marg) + (X[, causal$inter1] * X[
+      ,
+      causal$inter2
+    ]) %*% model$inter
 
-    if (intercept) {
-        risk <- risk - mean(risk)
-    }
+  if (intercept) {
+    risk <- risk - mean(risk)
+  }
 
-    phenotypes <- stats::runif(dim(X)[1]) < (1/(1 + exp(-risk)))
+  phenotypes <- stats::runif(dim(X)[1]) < (1 / (1 + exp(-risk)))
 
-    return(phenotypes)
+  return(phenotypes)
 }
 
 #' Merges a number of clusters around the target
@@ -217,18 +226,22 @@ sim_phenotype <- function(X, causal, model, intercept = TRUE) {
 #'
 #' @export
 merge_cluster <- function(clusters, center, k = 3) {
-    stopifnot(center %in% clusters)
-    if (is.atomic(k) & length(k) == 1L) {
-        stopifnot((2 * k + 1) <= nlevels(as.factor(clusters)))
-        idx_window <- center - (-k:k)
-    } else {
-        stopifnot(all(k %in% clusters))
-        idx_window <- k
-    }
+  stopifnot(center %in% clusters)
+  if (is.atomic(k) & length(k) == 1L) {
+    stopifnot((2 * k + 1) <= nlevels(as.factor(clusters)))
+    idx_window <- center - (-k:k)
+  } else {
+    stopifnot(all(k %in% clusters))
+    idx_window <- k
+  }
 
-    clusters[which(clusters %in% idx_window)] <- center
-    clusters <- vapply(clusters, function(s) match(s, sort(unique(clusters))),
-        numeric(1))
+  clusters[which(clusters %in% idx_window)] <- center
+  clusters <- vapply(
+    clusters, function(s) match(s, sort(unique(clusters))),
+    numeric(1)
+  )
 
-    return(clusters)
+  return(clusters)
 }
+4
+4
