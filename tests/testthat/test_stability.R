@@ -72,3 +72,5 @@ test_that("stabilityBIG shortens the path if the model saturates", {
     short = TRUE
   ), "double")
 })
+4
+4

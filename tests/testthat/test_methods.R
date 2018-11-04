@@ -70,3 +70,5 @@ test_that("do.call is instructed for stabilityBIG", {
     ncores = 2, n_subsample = 20, n_lambda = 100
   ), p)
 })
+4
+4

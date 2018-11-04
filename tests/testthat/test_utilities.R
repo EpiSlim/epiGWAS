@@ -136,3 +136,5 @@ test_that("merge_cluster runs correctly for k as vector", {
   merged[merged %in% 3:5] <- 2
   expect_equal(merge_cluster(clusters, center, k), merged)
 })
+4
+4

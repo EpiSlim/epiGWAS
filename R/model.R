@@ -243,3 +243,5 @@ merge_cluster <- function(clusters, center, k = 3) {
 
   return(clusters)
 }
+4
+4

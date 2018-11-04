@@ -29,3 +29,5 @@
 #' data(genotypes)
 #' \dontrun{hmm <- fast_HMM(genotypes, fp_path = '~/path/to/fastPHASE')}
 "genotypes"
+4
+4

@@ -98,3 +98,5 @@ test_that("the output of cond_prob are valid propensity scores regardless of
     binary = FALSE
   )), rep(1, n_samples))
 })
+4
+4
