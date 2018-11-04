@@ -219,5 +219,3 @@ fast_HMM <- function(X, out_path = NULL, X_filename = NULL, fp_path = "bin/fastP
 
   return(hmm)
 }
-4
-4

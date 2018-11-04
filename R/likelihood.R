@@ -64,5 +64,3 @@ BOOST <- function(A, X, Y, ncores = 1) {
 
   return(loglikelihood)
 }
-4
-4

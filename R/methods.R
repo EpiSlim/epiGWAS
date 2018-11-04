@@ -321,5 +321,3 @@ robust_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
 
     return(aucs)
 }
-4
-4

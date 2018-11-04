@@ -36,5 +36,3 @@ test_that("BOOST computed scores are correct", {
 
   expect_equal(BOOST(A, matrix(X, ncol = 1), Y), fit01$dev - fit2$dev)
 })
-4
-4

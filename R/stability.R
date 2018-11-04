@@ -252,5 +252,3 @@ stabilityBIG <- function(X, Y, family = "gaussian", n_subsample = 20, n_lambda =
 
   return(aucs)
 }
-4
-4
