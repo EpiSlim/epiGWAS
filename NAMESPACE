@@ -3,6 +3,7 @@
 export(BOOST)
 export(OWL)
 export(cond_prob)
+export(epiGWAS)
 export(fast_HMM)
 export(forward)
 export(forward_sample)

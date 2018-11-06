@@ -1,15 +1,15 @@
 #' Samples causal SNPs with different effect types
 #'
 #' The sampled SNPs are combined in a list of character vectors with the
-#' following names: target, marginal, inter1 and inter2. Through the
+#' following fields: target, marginal, inter1 and inter2. Through the
 #' parameters \code{overlap_marg} and \code{overlap_inter}, the synergistic
-#' SNPs with the target can have additional marginal/epistatic effects. The
+#' SNPs with the target can have additional marginal and epistatic effects. The
 #' SNPs are consecutively sampled in the following order: target, marginal,
 #' inter1 and inter2. For each SNP, we iteratively sample until the picked
 #' SNP candidate meets the constraints defined by \code{thresh_MAF} and
-#' \code{window_size} (see Arguments for more details) or until the maximum
-#' number of resamplings is reached. To avoid redundancy, we sample at most
-#' one SNP per cluster.
+#' \code{window_size} (see arguments for more details) or until the maximum
+#' number of resamplings is reached. To avoid duplication of effects, we
+#' sample at most one SNP per cluster.
 #'
 #' @section Warning:
 #' Make sure to supply the SNP IDs in \code{names(clusters)}. The SNPs in
@@ -17,7 +17,7 @@
 #'
 #' @param nX number of SNPs interacting with the target variant
 #' @param nY number of SNPs with marginal effects
-#' @param nZ12 nummber of SNP pairs with epistatic effects
+#' @param nZ12 number of SNP pairs with epistatic effects
 #' @param clusters vector of cluster memberships. Typically, the output
 #'   of \code{\link[stats]{cutree}}. For ease of identification,
 #'   the SNP IDs in \code{names(clusters)} are mandatory.
@@ -28,17 +28,17 @@
 #'   the retrieval performance on common variants better reflects the true
 #'   performance of the epistasis detection algorithm.
 #' @param window_size in number of clusters. Beside the target variant, the
-#'   other causal SNPs are sampled outside of a window centered around the
-#'   target. On each side of the target variant, the number of clusters to
-#'   discard is \code{window_size}.
+#'   causal SNPs are sampled outside of a window centered around the
+#'   target. On each side of the target variant, the width of the window
+#'   is \code{window_size}.
 #' @param overlap_marg number of SNPs with both synergistic effects with the
 #'   target and mariginal effects
 #' @param overlap_inter number of SNPs with both synergistic effects with the
 #'   target and additional epistatic effects
-#' @param max_iter maximum number of resamplings for each SNP. If exceeded,
-#'   the function generates an error
+#' @param max_iter maximum number of sampling rejections for each SNP.
+#'   If exceeded, the function generates an error
 #'
-#' @return list of character vectors corresponding to the causal SNP IDs. The
+#' @return list of character vectors containing to the causal SNP IDs. The
 #'   output list entries are: target, marginal, inter1 and inter2. An
 #'   epistatic pair is obtained from the combination of two SNPs with
 #'   identical positions in \code{inter1} and \code{inter2}.
@@ -110,15 +110,15 @@ sample_SNP <- function(nX, nY, nZ12, clusters, MAF, thresh_MAF = 0.2, window_siz
 #' 'inter' are, respectively, the marginal and epistatic effect sizes. The
 #' effect sizes are independent and normally-distributed. The \code{mean}
 #' parameter is either a list of vectors or a vector of length 4. If
-#' \code{mean} is a vector, then the effet sizes for each type of effects are
-#' identically distributed. Otherwise, the corresponding vector in the list
+#' \code{mean} is a vector, then the effet sizes for each type of effects have
+#' the same mean. Otherwise, the corresponding vector in the list
 #' specifies their individual means. The same logic applies to \code{sd}, the
 #' standard deviation parameter. For coherence, the parameters \code{mean} and
 #' \code{sd} are encoded in the same order as the output.
 #'
 #' @param nX number of SNPs interacting with the target variant
 #' @param nY number of SNPs with marginal effects
-#' @param nZ12 nummber of SNP pairs with epistatic effects
+#' @param nZ12 number of SNP pairs with epistatic effects
 #' @param mean vector or list of means
 #' @param sd vector or list of standard deviations
 #'
@@ -155,10 +155,9 @@ gen_model <- function(nX, nY, nZ12, mean = rep(0, 4), sd = rep(1, 4)) {
 #' The phenotypes are simulated according to a logistic regression model.
 #' Depending on the chosen configuration in \code{\link{sample_SNP}}, the model
 #' includes different effect types: synergistic effects with the target,
-#' marginal effects and additional epistatic effects. As the generated
-#' phenotypes vector is often to supplied to supervized learning tasks, we
-#' offer the option to obtain a balanced dataset, through the \code{intercept}
-#' paramter
+#' marginal effects and additional epistatic effects. We offer the option to
+#' generate a balanced phenotype vector between cases and controls, through the
+#' \code{intercept} parameter.
 #'
 #' @param X genotype matrix
 #' @param causal causal SNPs.
@@ -168,7 +167,9 @@ gen_model <- function(nX, nY, nZ12, mean = rep(0, 4), sd = rep(1, 4)) {
 #'   controls.
 #'
 #' @return A vector of simulated phenotypes which are encoded as a two-level
-#' factor (TRUE/FALSE).
+#'   factor (TRUE/FALSE).
+#'
+#' @seealso \code{\link{sample_SNP}} and \code{\link{gen_model}}
 #'
 #' @export
 sim_phenotype <- function(X, causal, model, intercept = TRUE) {
@@ -200,19 +201,19 @@ sim_phenotype <- function(X, causal, model, intercept = TRUE) {
 
 #' Merges a number of clusters around the target
 #'
-#' Replaces the indices of neighbor clusters with \code{center}, the
-#' target cluster index. The neighborhood is defined according to the parameter
-#' \code{k} (see Arguments for more details). The real purpose of the function
-#' \code{\link{merge_cluster}} is to define an enlarged window of SNPs which
-#' are in linkage disequilibrium with the target. Subsequently, we filter
-#' them out for the estimate of the propensity scores.
+#' The purpose of the function \code{\link{merge_cluster}} is to
+#' define an enlarged window of SNPs which
+#' are in linkage disequilibrium with the target. It replaces the indices of neighbor
+#' clusters with \code{center}, the target cluster index. The neighborhood is defined
+#' according to the parameter \code{k} (see Arguments for more details). Subsequently,
+#' we filter them out for the estimate of the propensity scores.
 #'
 #' @param clusters vector of cluster memberships. Typically, the output
 #'   of \code{\link[stats]{cutree}}
 #' @param center the target variant cluster
-#' @param k vector or integer. if \code{k} is a vector, it corresponds to
-#'   the cluster indices to be updated. Otherwise, \code{k} is an integer
-#'   and the cluster indices to be updated lie between \code{center-k} and
+#' @param k vector or integer. if \code{k} is given as a vector, it corresponds to
+#'   the cluster indices to be updated. Otherwise, if \code{k} is an integer,
+#'   the cluster indices to be updated lie between \code{center-k} and
 #'   \code{center+k}.
 #'
 #' @return The updated cluster membership vector. The cluster indexing is also

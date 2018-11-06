@@ -1,6 +1,6 @@
-#' Minor allele frequencies
+#' SNP minor allele frequencies
 #'
-#' \code{maf} contains the minor allele frequencies of the 450 SNPs in
+#' \code{maf} contains the minor allele frequencies for the 450 SNPs in
 #' the \code{\link{genotypes}} dataset
 #'
 #' @docType data

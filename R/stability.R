@@ -22,16 +22,16 @@ subsample <- function(n, size = n %/% 2, n_subsample) {
 #' Computes the area under the stability path for all covariates
 #'
 #' To perform model selection, this function scores all covariates in \code{X}
-#' according to the areas under the stability selection paths. Our model selection
+#' according to the areas under their stability selection paths. Our model selection
 #' procedure starts by dynamically defining a grid for
 #' the elastic net penalization parameter \eqn{\lambda}{lambda}. To define the
 #' grid, we solve the full-dataset elastic net. That yields
-#' \code{n_lambda} log-scaled values between \eqn{\lambda_{max}}{lambda_{max}}
-#' and \eqn{\lambda_{min}}{lambda_{min}}. \eqn{\lambda_{max}}{lambda_{max}} is
+#' \code{n_lambda} log-scaled values between \eqn{\lambda_{max}}{lambda_max}
+#' and \eqn{\lambda_{min}}{lambda_min}. \eqn{\lambda_{max}}{lambda_max} is
 #' the maximum value for which the elastic net support is not empty. On the other hand,
-#' \eqn{\lambda_{min}}{lambda_{min}} can be derived through
-#' \code{lambda_min_ratio}, which is the ratio of \eqn{\lambda_{min}}{lambda_{min}}
-#' to \eqn{\lambda_{max}}{lambda_{max}}. The next step is identical to the original
+#' \eqn{\lambda_{min}}{lambda_min} can be derived through
+#' \code{lambda_min_ratio}, which is the ratio of \eqn{\lambda_{min}}{lambda_min}
+#' to \eqn{\lambda_{max}}{lambda_max}. The next step is identical to the original
 #' stability selection procedure. For each value of \eqn{\lambda}{lambda}, we
 #' solve \code{n_subsample} times the same elastic net, though for a different subsample.
 #' The subample is a random selection of half of the samples of the original dataset.
@@ -41,22 +41,22 @@ subsample <- function(n, size = n %/% 2, n_subsample) {
 #' the corresponding empirical frequency. The final scores are the areas under the
 #' stability path curves. That is a key difference with the original stability
 #' selection procedure where the final score is the maximum empirical frequency.
-#' On extensive simulations, our scoring technique outperformed maximum empirical
+#' On simulations, our scoring technique outperformed maximum empirical
 #' frequencies.
 #'
-#' @family model selection functions
+#' @family support estimation functions
 #'
 #' @param X input design matrix
 #' @param Y response vector
-#' @param weights positive sample weights
+#' @param weights nonnegative sample weights
 #' @param family response type. Either 'gaussian' or 'binomial'
 #' @param n_subsample number of subsamples for stability selection
 #' @param n_lambda total number of lambda values
 #' @param short whether to compute the aucs only on the first half
-#' of the stability path. We observed better performance for the
+#' of the stability path. We observed better performance for
 #' thresholded paths
-#' @param lambda_min_ratio ratio of \eqn{\lambda_{min}}{lambda_{min}} and
-#' \eqn{\lambda_{max}}{lambda_{max}} (see Description for a thorough explanation)
+#' @param lambda_min_ratio ratio of \eqn{\lambda_{min}}{lambda_min} to
+#' \eqn{\lambda_{max}}{lambda_{max}} (see description for a thorough explanation)
 #' @param eps elastic net mixing parameter.
 #'
 #' @return a vector containing the areas under the stability path
@@ -65,11 +65,8 @@ subsample <- function(n, size = n %/% 2, n_subsample) {
 #' @details For a fixed \eqn{\lambda}{lambda},
 #' the L2 penalization is \eqn{\lambda \times eps}{lambda * eps}, while
 #' the L1 penalization is \eqn{\lambda \times (1-eps)}{lambda * (1-eps)}.
-#' The goal of L2 penalization is just to ensure the uniqueness of the
+#' The goal of the L2 penalization is to ensure the uniqueness of the
 #' solution. For that reason, we recommend setting eps << 1.
-#'
-#' @details All of the elastic nets in this function are solved using the
-#' single-thread solver \code{\link[glmnet]{glmnet}}
 #'
 #' @references Slim, L., Chatelain, C., Azencott, C.-A., & Vert, J.-P.
 #' (2018).Novel Methods for Epistasis Detection in Genome-Wide Association
@@ -139,7 +136,7 @@ stabilityGLM <- function(X, Y, weights = rep(1, nrow(X)), family = "gaussian",
 
 #' Computes the area under the stability path for all covariates
 #'
-#' This function implements the same model selection procedure extensively
+#' This function implements the same model selection technique extensively
 #' described in \code{\link{stabilityGLM}}. The sole difference is the use
 #' of a different elastic net solver. In this function, we make use of
 #' \code{\link[biglasso]{biglasso}}. Thanks to its parallel
@@ -148,7 +145,7 @@ stabilityGLM <- function(X, Y, weights = rep(1, nrow(X)), family = "gaussian",
 #' additional backend files, a slight decrease in running time is to be expected,
 #' compared with \code{\link{stabilityGLM}}.
 #'
-#' @family model selection functions
+#' @family support estimation functions
 #'
 #' @param X design matrix formatted as a
 #' \code{\link[bigmemory]{big.matrix}} object
@@ -162,7 +159,7 @@ stabilityGLM <- function(X, Y, weights = rep(1, nrow(X)), family = "gaussian",
 #' @param eps elastic net mixing parameter (see \code{\link{stabilityGLM}}
 #' for more details)
 #' @param short whether to compute the aucs only on the first half
-#' of the stability path. We observed better performance for the
+#' of the stability path. We observed better performance with
 #' thresholded paths
 #' @param ncores number of cores for the
 #'  \code{\link[biglasso]{biglasso}} solver
@@ -173,7 +170,7 @@ stabilityGLM <- function(X, Y, weights = rep(1, nrow(X)), family = "gaussian",
 #' @return a vector grouping the aucs of all covariates within \code{X}
 #'
 #' @references Slim, L., Chatelain, C., Azencott, C.-A., & Vert, J.-P.
-#' (2018).Novel Methods for Epistasis Detection in Genome-Wide Association
+#' (2018). Novel Methods for Epistasis Detection in Genome-Wide Association
 #' Studies. BioRxiv.
 #'
 #' @references Meinshausen, N., & Bühlmann, P. (2010). Stability
@@ -184,8 +181,8 @@ stabilityGLM <- function(X, Y, weights = rep(1, nrow(X)), family = "gaussian",
 #'
 #' @export
 stabilityBIG <- function(X, Y, family = "gaussian", n_subsample = 20, n_lambda = 100,
-                         lambda_min_ratio = 0.01, eps = 1e-05, short = TRUE, ncores = 4, dir = tempdir(),
-                         prefix = "subX") {
+                         lambda_min_ratio = 0.01, eps = 1e-05, short = TRUE, ncores = 2,
+                         dir = tempdir(), prefix = "subX") {
   stopifnot(family %in% c("gaussian", "binomial"))
   stopifnot(bigmemory::is.big.matrix(X))
   stopifnot(dir.exists(dir))

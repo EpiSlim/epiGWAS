@@ -70,3 +70,28 @@ test_that("do.call is instructed for stabilityBIG", {
     ncores = 2, n_subsample = 20, n_lambda = 100
   ), p)
 })
+
+test_that("jointly calling all methods is possible with epiGWAS", {
+  n_samples <- 200
+  p <- 20
+  X <- matrix(
+    (runif(n_samples * p, min = 0, max = 1) <
+      runif(n_samples * p, min = 0, max = 1)) +
+      (runif(n_samples * p, min = 0, max = 1) <
+        runif(n_samples * p, min = 0, max = 1)),
+    ncol = p, nrow = n_samples
+  )
+  A <- (runif(n_samples, min = 0, max = 1) < 0.5)
+  propensity <- runif(n_samples, min = 0.4, max = 0.8)
+  Y <- (runif(n_samples, min = 0, max = 1) < 0.5)
+
+  epiGWAS_aucs <- epiGWAS(A, X, Y, propensity,
+    methods = "all",
+    parallel = TRUE, shift = 0.1,
+    ncores = 2, n_subsample = 20
+  )
+  expect_equal(names(epiGWAS_aucs), c(
+    "OWL", "modified_outcome", "normalized_outcome",
+    "shifted_outcome", "robust_outcome"
+  ))
+})

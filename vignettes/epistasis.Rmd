@@ -153,11 +153,7 @@ X <- genotypes[, colnames(genotypes) != causal$target]
 
 We ran all methods in their default settings, which generally offers a good trade-off between speed and inference performance
 ```{r}
-stability_owl <- OWL(A, X, phenotype, propensity)
-stability_modified <- modified_outcome(A, X, phenotype, propensity)
-stability_shifted <- shifted_outcome(A, X, phenotype, propensity)
-stability_normalized <- normalized_outcome(A, X, phenotype, propensity)
-stability_robust <- robust_outcome(A, X, phenotype, propensity)
+stability_scores <- epiGWAS(A, X, phenotype, propensity)
 ```
 
 The last step is evaluate the model selection performance in terms of the areas under the receiver operating characteristic (ROC) and precision/recall curves (PR).
@@ -169,10 +165,7 @@ require("precrec", quietly = TRUE)
 require("knitr", quietly = TRUE)
 require("kableExtra", quietly = TRUE)
 
-stability_scores <- join_scores(
-  stability_owl, stability_modified, stability_shifted,
-  stability_normalized, stability_robust
-)
+stability_scores <- join_scores(stability_scores)
 
 format_scores <- mmdata(
   scores = stability_scores,

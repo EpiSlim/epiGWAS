@@ -27,5 +27,7 @@
 #'
 #' @examples
 #' data(genotypes)
-#' \dontrun{hmm <- fast_HMM(genotypes, fp_path = '~/path/to/fastPHASE')}
+#' \dontrun{
+#' hmm <- fast_HMM(genotypes, fp_path = '/path/to/fastPHASE')
+#' }
 "genotypes"

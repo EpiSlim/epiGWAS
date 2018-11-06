@@ -1,7 +1,7 @@
-#' Applies the forward algorithm to a single sample
+#' Applies the forward algorithm to a single observation
 #'
 #' The forward algorithm is applied in order to compute the joint
-#' probability for the state \code{x}. For hidden Markov models,
+#' probability for the observation \code{x}. For hidden Markov models,
 #' the forward algorithm is an attractive option because of its
 #' linear complexity in the number of hidden states. However, the
 #' complexity becomes quadratic in terms of the dimensionality of
@@ -12,7 +12,7 @@
 #' @param p_trans 3D dimensional array for the transition probabilities
 #' @param p_emit 3D dimensional array for the emission probabilities
 #'
-#' @return joint probability for the state x in a log form
+#' @return Joint probability for the state x in a log form
 #'
 #' @details Our implementation of the forward algorithm
 #' makes use of the LogSumExp transformation for increased
@@ -48,7 +48,7 @@ forward_sample <- function(x, p_init, p_trans, p_emit) {
 #' Applies the \code{forward_sample} function to each row in \code{X}. If
 #' the \code{ncores} > 1, the function calling is performed in a parallel
 #' fashion to reduce the running time. The parallelisation backend
-#' is \code{doSNOW}.  If the package \code{doSNOW} is not installed,
+#' is \code{doSNOW}.  If the latter package is not installed,
 #' the function switches back to single-core mode.
 #'
 #' @param X genotype matrix. Each row corresponds to a separate sample
@@ -57,7 +57,7 @@ forward_sample <- function(x, p_init, p_trans, p_emit) {
 #' @param p_emit 3D dimensional array for the emission probabilities
 #' @param ncores number of threads (default 1)
 #'
-#' @return a vector of log probabilities
+#' @return A vector of log probabilities
 #'
 #' @references Rabiner, Lawrence R. 'A tutorial on hidden Markov models
 #' and selected applications in speech recognition.' Proceedings of the
@@ -110,12 +110,12 @@ forward <- function(X, p_init, p_trans, p_emit, ncores = 1) {
 #' \eqn{P(A=1\lvert X)}{P(A=1|X)} and \eqn{P(A=0\lvert X)}{P(A=0|X)}. The
 #' application of the forward algorithm on the passed \code{hmm} allows us to
 #' estimate the joint probability of (A, X), for all values of the target
-#' variant (0, 1, 2). The Bayes formula yields the corresponding conditional
+#' variant A = 0, 1, 2. The Bayes formula yields the corresponding conditional
 #' probabilities. Depending on the binarization rule, we combine them to
 #' obtain the propensity scores.
 #'
 #' @param X genotype matrix. Make sure to assign \code{colnames(X)} beforehand.
-#' @param target_name target variant ID
+#' @param target_name target variant name
 #' @param hmm fitted parameters of the fastPHASE hidden Markov model. The HMM
 #' model is to be fitted with the \code{\link{fast_HMM}} function.
 #' @param binary if \code{TRUE}, the target SNP values 0 and (1,2)
@@ -124,7 +124,7 @@ forward <- function(X, p_init, p_trans, p_emit, ncores = 1) {
 #' 0 and 1 respectively map to (0,1) and 2.
 #' @param ncores number of threads (default 1)
 #'
-#' @return two-column propensity score matrix. The first column lists the
+#' @return Two-column propensity score matrix. The first column lists the
 #' propensity score \eqn{P\left(A=0\lvert X\right)}{P(A=0|X)}, while the
 #' second gives \eqn{P\left(A=1\lvert X\right)}{P(A=1|X)}.
 #'
@@ -147,23 +147,19 @@ cond_prob <- function(X, target_name, hmm, binary = FALSE, ncores = 1) {
   p_obs <- t(apply(p_obs, 1, function(x) return(x - matrixStats::logSumExp(x))))
 
   if (binary) {
-    propensity <- cbind(exp(p_obs[, 1]), exp(p_obs[, 2]) + exp(p_obs[
-      ,
-      3
-    ]))
+    propensity <- cbind(exp(p_obs[, 1]), exp(p_obs[, 2]) + exp(p_obs[, 3]))
   } else {
-    propensity <- cbind(exp(p_obs[, 1]) + exp(p_obs[, 2]), exp(p_obs[
-      ,
-      3
-    ]))
+    propensity <- cbind(exp(p_obs[, 1]) + exp(p_obs[, 2]), exp(p_obs[, 3]))
   }
 
   return(propensity)
 }
 
-#' In this function, we fit the fastPHASE hidden Markov model using the EM
+#' Fits a HMM to a genotype dataset by calling fastPHASE
+#'
+#' In this function, we fit the fastPHASE hidden Markov model (HMM) using the EM
 #' algorithm. The fastPHASE executable is required to run \code{fast_HMM}. It
-#' is available from the following web page: \url{http://scheet.org/software.html}
+#' can be downloaded from the following web page: \url{http://scheet.org/software.html}
 #'
 #' @param X genotype matrix
 #' @param out_path prefix for the fitted paramaters filenames. If \code{NULL},
@@ -174,7 +170,7 @@ cond_prob <- function(X, target_name, hmm, binary = FALSE, ncores = 1) {
 #' @param n_state dimensionality of the latent space
 #' @param n_iter number of iterations for the EM algorithm
 #'
-#' @return fitted parameters of the fastPHASE HMM. They are grouped in a list
+#' @return Fitted parameters of the fastPHASE HMM. They are grouped in a list
 #'   with the following fields: \code{pInit} for the initial marginal
 #'   distribution, the three-dimensional array \code{Q} for the transition
 #'   probabilities and finally \code{pEmit}, another three-dimensional array
