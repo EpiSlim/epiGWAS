@@ -23,20 +23,20 @@ text-align: justify}
 </style>
 
 In this vignette, we cover the epistasis detection methods implemented in this package. The methods can be partitioned into two main categories: modified outcome and outcome weighted learning. Both methods recover the pure epistatic interactions with a predetermined variant, referred to as the `target`. The `target` can be drawn from the literature, experiments or top
-hits in previous GWAS. Narrowing the scope around a single variant is made possible by propensity scores [@rosenbaum1983] which, for genomic data, model the linkage disequilibrium (LD) dependency between the `target` and neighboring variants. We include them differently in outcome weighted learning and modified outcome in order to identify the SNPs interacting with $A$.
+hits in previous GWAS. Narrowing the scope around a single variant is made possible by propensity scores [@rosenbaum1983] which, for genomic data, model the linkage disequilibrium (LD) dependency between the `target` and neighboring variants. We include them differently in outcome weighted learning and modified outcome in order to identify the SNPs interacting with the target.
 
-The methods are briefly reviewed in this vignette before showcasing their performace on a simulated genotypic dataset. For more details, we refer the prospective user to [@Slim2018].
+The methods are briefly reviewed in this vignette before showcasing their performace on a dataset of simulated genotypes. For more details, we refer the prospective user to [@Slim2018].
 
 ## Phenotype-genotype decomposition
 We first consider a triplet of random variables $\left(X, A, Y\right)$:
 
-* $Y$ denotes a binary (*e.g.* in case-control studies) or discrete phenotype.
-* $X= \left(X_1,\cdots, X_p\right) \in \lbrace 0, 1, 2\rbrace$ represents a genotype with $p$ single-nucleotide polymorphisms (SNPs).
-* $A$ is a $(p+1)$-SNP that is encoded as $\lbrace -1, +1\rbrace$. Let $\underline{A} = (A+1)/2$ be a second binarized version of $A$ with values in $\lbrace 0,+1\rbrace$. Depending on the binarization rule fpr $\lbrace 0, 1, 2\rbrace$, we can model both dominant and recessive mechanisms.
+* $Y$ denotes a binary (*e.g.* in case-control studies) or continuous phenotype.
+* $X= \left(X_1,\cdots, X_p\right) \in \lbrace 0, 1, 2\rbrace^{p}$ represents a genotype with $p$ single-nucleotide polymorphisms (SNPs).
+* $A$ is a $(p+1)$-SNP that is encoded as $\lbrace -1, +1\rbrace$. Let $\underline{A} = (A+1)/2$ be a second binarized version of $A$ with values in $\lbrace 0,+1\rbrace$. Depending on the binarization rule for the SNP values $\lbrace 0, 1, 2\rbrace$, we can model both dominant and recessive mechanisms.
 
 The symmetric encoding of $A$ allows the following genotype-phenotype decomposition:
 $$
-Y = \mu(X) + \delta(X)\times A + \epsilon,
+Y = \mu(X) + \delta(X)\cdot A + \epsilon,
 $$
 where $\epsilon$ is a zero mean random variable and
 $$
@@ -48,7 +48,7 @@ $$
 \right.
 $$
 
-The above decomposition separates $\mu(X)$, the main effects term of the SNPs within $X$ from $\delta(X)$ which models their pure epistatic effects with the `target`  SNP $A$. Under a sparsity assumption for $\delta(X)$, detecting epistasis amounts to the recovery of the support of $\delta(X)$. However, for a given sample, we only observe one of the two possibilities $A = +1$ or $A = -1$, making impossible the direct estimate of the term $\delta(X)$. To overcome this problem, we make use of the propensity score $\pi(A\lvert X)$. Mathematically speaking, it corresponds to the conditional probability of $A$ given $X$. In our case, where $A$ and $X$ are SNPs, $\pi(A\lvert X)$ models the LD between $A$ and $X$. The first category of methods, that we call modified outcome, incorporate $\pi(A\lvert X)$ in the outcome. The second category, outcome weighted learning, includes them in the sample weights along with the phenotype $Y$. Both categories are penalized regression approaches to which apply a stability selection procedure [@Meinshausen2010] for supprt estimation.
+The above decomposition separates $\mu(X)$, the main effects term from $\delta(X)\cdot A$ which models the pure epistatic effects of the SNPs in $X$ with the `target` SNP $A$. Under a sparsity assumption for $\delta(X)$, detecting epistasis amounts to the recovery of the support of $\delta(X)$. However, for a given sample, we only observe one of the two possibilities $A = +1$ or $A = -1$, making impossible the direct estimate of the term $\delta(X)$. To overcome this problem, we make use of the propensity score $\pi(A\lvert X)$. Mathematically speaking, it corresponds to the conditional probability of $A$ given $X$. In our case, where $A$ and $X$ are SNPs, $\pi(A\lvert X)$ models the LD between $A$ and $X$. The first category of methods, that we call modified outcome, incorporate $\pi(A\lvert X)$ in the outcome. The second category, outcome weighted learning, includes them in the sample weights along with the phenotype $Y$. Both categories are penalized regression approaches to which apply a stability selection procedure [@Meinshausen2010] for supprt estimation.
 
 ## Modified outcome
 In modified outcome, we substitute $A$ with $\underline{A}$ to rewrite $\delta(X)$ in the following way:
@@ -66,7 +66,7 @@ $$
 \delta(X) = \frac{1}{2}\mathbb{E}\left[\underline{Y}\lvert X\right]
 $$
 
-We can then recover the support of $\delta(X)$ by applying a model selection procedure to the penalized regression model where the sample covariates are $X$ and the outcome is $\underline{Y}$. However, in case of misspecification of the propensity score, modified selection may suffer from numerical instability. We therefore propose three extensions to help mitigate that. The first extension is shifted modified outcome and consists in the addition of a regularization term $\xi$ to the inverses of the propensity scores *i.e.* $1/(\pi(A\lvert X) + \xi)$. The second proposition, normalized modified outcome, normalizes $\underline{A}/\pi(\underline{A} = 1\lvert X)$ and $(1-\underline{A})/\pi(\underline{A} = 0\lvert X)$ respectively by their sums, $\sum_{i=1}^{n} \dfrac{\underline{A}^{(i)}}{\pi(\underline{A}^{(i)} = 1\lvert X^{(i)})}$ and $\sum_{i=1}^{n} \dfrac{1-\underline{A}^{(i)}}{\pi(\underline{A}^{(i)} = 0\lvert X^{(i)})}$. The last but certainly not least proposition is robust modified outcome (formula not shown here) [@Lunceford2004]. In extensive simulations [@Slim2018], it outperformed not only the other approaches within the modified outcome family, but also BOOST [@Wan2010], a state-of-the-art method for epistasis detection.
+We can then recover the support of $\delta(X)$ by applying a model selection procedure to the penalized regression problem where the sample covariates are $X$ and the outcome is $\underline{Y}$. However, in case of misspecification of the propensity score, modified outcome may suffer from numerical instability. We therefore propose three extensions to help mitigate that. The first extension is shifted modified outcome and consists in the addition of a regularization term $\xi$ to the inverses of the propensity scores *i.e.* $1/(\pi(A\lvert X) + \xi)$. The second proposition, normalized modified outcome, respectively normalizes $\underline{A}/\pi(\underline{A} = 1\lvert X)$ and $(1-\underline{A})/\pi(\underline{A} = 0\lvert X)$ by their sums, $\sum_{i=1}^{n} \dfrac{\underline{A}^{(i)}}{\pi(\underline{A}^{(i)} = 1\lvert X^{(i)})}$ and $\sum_{i=1}^{n} \dfrac{1-\underline{A}^{(i)}}{\pi(\underline{A}^{(i)} = 0\lvert X^{(i)})}$. The last but certainly not least proposition is robust modified outcome [see @Slim2018; also @Lunceford2004]. In extensive simulations [@Slim2018], it outperformed not only the other approaches within the modified outcome family, but also BOOST [@Wan2010], a state-of-the-art method for epistasis detection.
 
 ## Outcome weighted learning
 
@@ -76,10 +76,10 @@ $$
 d(X) = \ln \frac{\mathbb{E}(Y\lvert A = +1, X)}{\mathbb{E}(Y\lvert A = +1, X)}
 $$
 
-The verification of $\text{sign}\; \delta(X) = \text{sign}\; d(X)$ is straightforward. That makes outcome weighted learning a relaxation of modified outcome. Nonetheless, the regression model is completely different.  Outcome weighted learning is a weighted binary classification problem where the sample weights are $Y/\pi(A\lvert X)$, the outcome is the target $A$ and the covariates remain $X$.  Without regularization, the inverses of the propensity scores can also result in numerical instability.
+The verification of $\text{sign}\; \delta(X) = \text{sign}\; d(X)$ is straightforward. That makes outcome weighted learning a relaxation of modified outcome. However, the regression models are completely unrelated.  Outcome weighted learning is a weighted binary classification problem where the sample weights are $Y/\pi(A\lvert X)$, the outcome is the target $A$ and the covariates remain $X$.  Without regularization, the use of the inverses of propensity scores can also result in numerical instability.
 
 ## Case study
-Now that the theoretical groundings of our methods are clear, we explain how to use them in practice for epistasis detection. For that purpose, we illustrate them on a synthetic dataset included with this package. Using the HAPGEN2 [@Su2011] software, we simulated $450$ SNPs on the $22^{nd}$ chromosome between the nucleotide positions $16061016$ [rs9617528] and $19976834$ [rs887201] in the GRCh37 coordinates.  The prior QC steps to control for rare variants ($\text{MAF} < 0.01$) and the Hardy–Weinberg equilibrium ($p < 10^{-6}$) have already been performed. The simulated genotypes are saved as an integer matrix. We also included their minor allele frequencies (MAFs).
+Now that the theoretical groundings of our methods are clear, we explain how to use them in practice for epistasis detection. For that purpose, we illustrate them on a synthetic dataset included with this package. Using the HAPGEN2 [@Su2011] software, we simulated $450$ SNPs on the $22^{nd}$ chromosome between the nucleotide positions $16061016$ and $19976834$ in the GRCh37 coordinates.  The prior QC steps to control for rare variants ($\text{MAF} < 0.01$) and the Hardy–Weinberg equilibrium ($p < 10^{-6}$) have already been performed. The simulated genotypes are saved as an integer matrix. We also included their minor allele frequencies (MAFs).
 
 The first step in the pipeline is evidently to load the genotypes matrix and the SNP MAFs vector.
 
@@ -90,7 +90,7 @@ data(maf)
 ```
 
 ### Linkage disequilibrium arount the target
-To alleviate linkage disequilibrium around the target $A$ and avoid overfitting in the estimation of the propensity scores $\pi(A\lvert X)$, we remove a number of SNPs within a certain window of $A$. On each side of the target, the width of the window is three clusters. Compared to fixed-size windows, dynamic windows allow to better take into the genetic architecture. The clusters are the result of an unsupervised clustering procedure *e.g* hierarchical clustering:  
+To alleviate linkage disequilibrium around the target $A$ and avoid overfitting in the estimation of the propensity scores $\pi(A\lvert X)$, we remove a number of SNPs within a certain window of $A$. On each side of the target, the width of the window is three clusters. The clusters are the result of an unsupervised clustering procedure such as hierarchical clustering. Compared to fixed-size windows, such dynamic windows allow to better take into account the genetic architecture.  
 
 ```{r}
 set.seed(347)
@@ -103,7 +103,7 @@ clusters <- cutree(hc, h = 1 - corr_max)
 
 ### Genotype construction
 
-After the clustering, we can select the causal SNPs. Beside the target, the other causal variants are sampled outside of the LD window. In total, we sample $80$ SNPs that interact with the target, $20$ with marginal effects and $20$ SNP pairs with epistatic effects. Moreover, among the $80$ synergistic SNPs, $10$ also have separate marginal effects and another $5$ have additional epistatic effects. The `fast_HMM` function samples at most one causal SNP per cluster to avoid duplication of effects. Despite the high number of selected SNPs, the problem is still imbalanced with $80$ out of $414$ SNPs being causal.   
+After the clustering, we can sample the causal SNPs. Beside the target, the other causal variants are sampled outside of the LD window. In total, we sample $80$ SNPs that interact with the target, $20$ with marginal effects and $20$ SNP pairs with epistatic effects. Moreover, among the $80$ synergistic SNPs, $10$ also have separate marginal effects and another $5$ have additional epistatic effects. The `sample_SNP` function samples at most one causal SNP per cluster to avoid duplication of effects. Despite the high number of selected SNPs, the problem is still imbalanced with $80$ out of $414$ SNPs being causal.   
 
 ```{r}
 # Parameterization of the disease model
@@ -111,8 +111,8 @@ window_target <- 3 # Width of the LD window on each side of the target
 nX <- 80 # Number of SNPs interacting with the target
 nY <- 20 # Number of SNPs with marginal effects
 nZ12 <- 20 # Number of SNP pairs with epistatic effects
-overlap_marg <- 10 # Number of SNPs interacting with the target in addition to their marginal effects
-overlap_inter <- 5 # Number of SNPs interacting with the target in addition to their epistatic effects
+overlap_marg <- 10 # Number of SNPs interacting with the target in addition to having marginal effects
+overlap_inter <- 5 # Number of SNPs interacting with the target in addition to having epistatic effects
 ```
 
 ```{r}
@@ -141,9 +141,9 @@ phenotype <- sim_phenotype(genotypes, causal, model) # Phenotype simulation
 ```
 
 ### Epistasis detection
-As the fastPHASE software cannot be included with this package, we directly provide the propensity scores vector. The results can be reproduced by running \code{fast_HMM} and the dimensionality of the latent space `n_state = 10` and the number of iterations for the EM algorithm `n_iter = 20`.
+As the fastPHASE software cannot be included with this package, we directly provide the propensity scores vector. The results can be reproduced by running `fast_HMM` with the dimensionality of the latent space `n_state = 10` and the number of iterations for the EM algorithm `n_iter = 20`.
 
-Before applying our epistasis detection methods, we separate the target $A$ from the rest of the genotype denoted here by $X$:
+Before applying our epistasis detection methods, we separate the target $A$ from the rest of the genotype, denoted here by $X$:
 
 ```{r}
 data("propensity")
@@ -153,10 +153,13 @@ X <- genotypes[, colnames(genotypes) != causal$target]
 
 We ran all methods in their default settings, which generally offers a good trade-off between speed and inference performance
 ```{r}
-stability_scores <- epiGWAS(A, X, phenotype, propensity)
+stability_scores <- epiGWAS(A, X, phenotype, propensity, 
+                            methods = c("OWL", "modified_outcome", "shifted_outcome", 
+                                        "normalized_outcome", "robust_outcome"),
+                            parallel = FALSE)
 ```
 
-The last step is evaluate the model selection performance in terms of the areas under the receiver operating characteristic (ROC) and precision/recall curves (PR).
+The last step is to evaluate the epistasis detection performance in terms of the areas under the receiver operating characteristic (ROC) and precision/recall (PR) curves.
 
 ```{r, echo=FALSE}
 labels <- colnames(X) %in% causal$syner # The positives are the SNPs interacting interacting with the target
@@ -185,8 +188,8 @@ colnames(ROC) <- c("Method", "ROC")
 rownames(ROC) <- NULL
 aucs_table <- merge(x = ROC, y = PRC, by = "Method", all = TRUE)
 kable(aucs_table, caption = "Areas under the ROC and PR curves")  %>%
-  kable_styling("striped", full_width = F) %>%
-  row_spec(which(aucs_table$Method == "Robust modified outcome"), bold = T, color = "white", background = "#37648d")
+  kable_styling("striped", full_width = FALSE) %>%
+  row_spec(which(aucs_table$Method == "Robust modified outcome"), bold = TRUE, color = "white", background = "#37648d")
 ```
 
 The results are perfectly concordant with our findings in [@Slim2018]. Among the five methods, robust modified outcome is obviously the best performer in terms of both ROC and PRC aucs. 

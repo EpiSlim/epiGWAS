@@ -378,6 +378,9 @@ robust_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
 #' @param ... additional arguments to be passed to \code{stabilityGLM} or
 #'     \code{stabilityBIG}
 #'
+#' @return list of numeric vectors. Each vector corresponds to the auc scores
+#'     of a particular method in \code{methods}.
+#'
 #' @seealso \code{OWL}, \code{modified_outcome}, \code{shifted_outcome},
 #'     \code{normalized_outcome} and \code{robust_outcome}
 #'
@@ -387,7 +390,7 @@ epiGWAS <- function(A, X, Y, propensity, methods = "all", parallel = TRUE, shift
     "OWL", "modified_outcome", "normalized_outcome",
     "shifted_outcome", "robust_outcome"
   )
-  if (methods == "all") {
+  if (any(methods == "all")) {
     methods <- methods_full
   } else {
     stopifnot(all(methods %in% methods_full))
