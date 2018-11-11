@@ -56,7 +56,7 @@ subsample <- function(n, size = n %/% 2, n_subsample) {
 #' of the stability path. We observed better performance for
 #' thresholded paths
 #' @param lambda_min_ratio ratio of \eqn{\lambda_{min}}{lambda_min} to
-#' \eqn{\lambda_{max}}{lambda_{max}} (see description for a thorough explanation)
+#' \eqn{\lambda_{max}}{lambda_max} (see description for a thorough explanation)
 #' @param eps elastic net mixing parameter.
 #'
 #' @return a vector containing the areas under the stability path
@@ -163,9 +163,6 @@ stabilityGLM <- function(X, Y, weights = rep(1, nrow(X)), family = "gaussian",
 #' thresholded paths
 #' @param ncores number of cores for the
 #'  \code{\link[biglasso]{biglasso}} solver
-#' @param dir directory for writing the \code{big.matrix} backing files. If not
-#'   given, a temporary directory is created
-#' @param prefix character prefix for the \code{big.matrix} filenames
 #'
 #' @return a vector grouping the aucs of all covariates within \code{X}
 #'
@@ -181,13 +178,10 @@ stabilityGLM <- function(X, Y, weights = rep(1, nrow(X)), family = "gaussian",
 #'
 #' @export
 stabilityBIG <- function(X, Y, family = "gaussian", n_subsample = 20, n_lambda = 100,
-                         lambda_min_ratio = 0.01, eps = 1e-05, short = TRUE, ncores = 2,
-                         dir = tempdir(), prefix = "subX") {
+                         lambda_min_ratio = 0.01, eps = 1e-05, short = TRUE, ncores = 2) {
   stopifnot(family %in% c("gaussian", "binomial"))
   stopifnot(bigmemory::is.big.matrix(X))
-  stopifnot(dir.exists(dir))
 
-  requireNamespace("bigpca", quietly = FALSE)
   requireNamespace("bigmemory", quietly = FALSE)
   requireNamespace("biglasso", quietly = FALSE)
 
@@ -211,16 +205,7 @@ stabilityBIG <- function(X, Y, family = "gaussian", n_subsample = 20, n_lambda =
   stab <- array(0, dim = c(length_lambda, dim(X)[2]))
 
   for (i in seq_len(n_subsample)) {
-    sink("/dev/null")
-    sub_X_desc <- bigpca::big.select(X,
-      select.rows = idx[, i], select.cols = seq_len(ncol(X)),
-      delete.existing = TRUE, deepC = TRUE, dir = dir, pref = prefix,
-      verbose = FALSE
-    )
-    sink()
-
-    sub_X <- bigpca::get.big.matrix(sub_X_desc)
-    sub_X_shared <- bigmemory::deepcopy(sub_X, shared = FALSE, type = "double")
+    sub_X_shared <- bigmemory::deepcopy(X, rows = idx[, i], shared = FALSE, type = "double")
     partial_fit <- biglasso::biglasso(
       X = sub_X_shared, y = Y[idx[, i]],
       penalty = "enet", family = family, ncores = ncores, lambda = full_fit$lambda,
@@ -235,8 +220,7 @@ stabilityBIG <- function(X, Y, family = "gaussian", n_subsample = 20, n_lambda =
     stab <- stab + t(partial_coef != 0)
   }
 
-  unlink(sub_X_desc, force = TRUE)
-  rm(sub_X, sub_X_shared)
+  rm(sub_X_shared)
   gc()
 
   stab <- stab / n_subsample
