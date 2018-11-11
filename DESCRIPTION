@@ -23,7 +23,6 @@ Suggests:
     snpStats,
     WGCNA,
     precrec,
-    bigpca,
     bigmemory,
     biglasso,
     testthat,
