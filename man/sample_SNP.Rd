@@ -33,7 +33,7 @@ target. On each side of the target variant, the width of the window
 is \code{window_size}.}
 
 \item{overlap_marg}{number of SNPs with both synergistic effects with the
-target and mariginal effects}
+target and marginal effects}
 
 \item{overlap_inter}{number of SNPs with both synergistic effects with the
 target and additional epistatic effects}

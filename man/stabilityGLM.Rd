@@ -48,7 +48,7 @@ the maximum value for which the elastic net support is not empty. On the other h
 to \eqn{\lambda_{max}}{lambda_max}. The next step is identical to the original
 stability selection procedure. For each value of \eqn{\lambda}{lambda}, we
 solve \code{n_subsample} times the same elastic net, though for a different subsample.
-The subample is a random selection of half of the samples of the original dataset.
+The subsample is a random selection of half of the samples of the original dataset.
 The empirical frequency of each covariate entering the support is then the number of
 times the covariate is selected in the support as a fraction of \code{n_subsample}.
 We obtain the stability path by associating each value of \eqn{\lambda}{lambda}

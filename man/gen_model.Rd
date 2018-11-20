@@ -21,7 +21,7 @@ gen_model(nX, nY, nZ12, mean = rep(0, 4), sd = rep(1, 4))
 a list of vectors corresponding to the effect size coefficients.
 }
 \description{
-The generated disease model is the list of effect size coeffcients.
+The generated disease model is the list of effect size coefficients.
 The list comprises the following fields: 'syner', 'marg' and 'inter'.
 'syner' is itself a list of numeric vectors with two entries named
 'A0' and 'A1'. 'A0' refers to the vector of effect sizes when the target
@@ -30,7 +30,7 @@ sizes in the case \eqn{A = 1}{A = 1}. The two other entries 'marg' and
 'inter' are, respectively, the marginal and epistatic effect sizes. The
 effect sizes are independent and normally-distributed. The \code{mean}
 parameter is either a list of vectors or a vector of length 4. If
-\code{mean} is a vector, then the effet sizes for each type of effects have
+\code{mean} is a vector, then the effect sizes for each type of effects have
 the same mean. Otherwise, the corresponding vector in the list
 specifies their individual means. The same logic applies to \code{sd}, the
 standard deviation parameter. For coherence, the parameters \code{mean} and

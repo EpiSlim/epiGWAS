@@ -79,7 +79,7 @@ OWL <- function(A, X, Y, propensity, ...) {
 #' In the modified outcome approach, we estimate the risk difference
 #' \eqn{\mathbb{E}\left[Y\lvert A=1,X\right]-\mathbb{E}\left[Y\lvert A=0,X\right]}{E[Y|A=1,X]-E[Y|A=0,X]}.
 #' The risk difference measures the synergy between \code{A} and the set of
-#' covariates in \code{X}. For genome-wide associtation studies, it can be
+#' covariates in \code{X}. For genome-wide association studies, it can be
 #' interpreted as a pure epistatic term. However, for a single sample, we only
 #' observe one of the two possibilities A=1 or A=0, making the direct
 #' estimate of the risk difference impossible. Through propensity scores,

@@ -47,7 +47,7 @@ forward_sample <- function(x, p_init, p_trans, p_emit) {
 #'
 #' Applies the \code{forward_sample} function to each row in \code{X}. If
 #' the \code{ncores} > 1, the function calling is performed in a parallel
-#' fashion to reduce the running time. The parallelisation backend
+#' fashion to reduce the running time. The parallelization backend
 #' is \code{doSNOW}.  If the latter package is not installed,
 #' the function switches back to single-core mode.
 #'
@@ -162,11 +162,11 @@ cond_prob <- function(X, target_name, hmm, binary = FALSE, ncores = 1) {
 #' can be downloaded from the following web page: \url{http://scheet.org/software.html}
 #'
 #' @param X genotype matrix
-#' @param out_path prefix for the fitted paramaters filenames. If \code{NULL},
+#' @param out_path prefix for the fitted parameters filenames. If \code{NULL},
 #'   the files are saved in a temporary directory.
 #' @param X_filename filename for the fastPHASE-formatted genotype file. If
 #'   \code{NULL}, the file is created in a temporary directory.
-#' @param fp_path path to the fastPHASE exectuable
+#' @param fp_path path to the fastPHASE executable
 #' @param n_state dimensionality of the latent space
 #' @param n_iter number of iterations for the EM algorithm
 #'

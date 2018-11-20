@@ -10,13 +10,13 @@ fast_HMM(X, out_path = NULL, X_filename = NULL,
 \arguments{
 \item{X}{genotype matrix}
 
-\item{out_path}{prefix for the fitted paramaters filenames. If \code{NULL},
+\item{out_path}{prefix for the fitted parameters filenames. If \code{NULL},
 the files are saved in a temporary directory.}
 
 \item{X_filename}{filename for the fastPHASE-formatted genotype file. If
 \code{NULL}, the file is created in a temporary directory.}
 
-\item{fp_path}{path to the fastPHASE exectuable}
+\item{fp_path}{path to the fastPHASE executable}
 
 \item{n_state}{dimensionality of the latent space}
 

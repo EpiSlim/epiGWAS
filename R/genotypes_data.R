@@ -1,6 +1,6 @@
 #' Simulated genotypes
 #'
-#' We simulated 300 unphased european genotypes. For that matter, we
+#' We simulated 300 unphased European genotypes. For that matter, we
 #' used the HAPGEN2 software and the 1000 genome phase 3 reference data.
 #' The simulated regions are located on the 22 chromosome between the
 #' nucleotide positions 16061016 (rs9617528) and 19976834 (rs887201).

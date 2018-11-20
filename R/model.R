@@ -32,7 +32,7 @@
 #'   target. On each side of the target variant, the width of the window
 #'   is \code{window_size}.
 #' @param overlap_marg number of SNPs with both synergistic effects with the
-#'   target and mariginal effects
+#'   target and marginal effects
 #' @param overlap_inter number of SNPs with both synergistic effects with the
 #'   target and additional epistatic effects
 #' @param max_iter maximum number of sampling rejections for each SNP.
@@ -101,7 +101,7 @@ sample_SNP <- function(nX, nY, nZ12, clusters, MAF, thresh_MAF = 0.2, window_siz
 
 #' Samples effect sizes for the disease model
 #'
-#' The generated disease model is the list of effect size coeffcients.
+#' The generated disease model is the list of effect size coefficients.
 #' The list comprises the following fields: 'syner', 'marg' and 'inter'.
 #' 'syner' is itself a list of numeric vectors with two entries named
 #' 'A0' and 'A1'. 'A0' refers to the vector of effect sizes when the target
@@ -110,7 +110,7 @@ sample_SNP <- function(nX, nY, nZ12, clusters, MAF, thresh_MAF = 0.2, window_siz
 #' 'inter' are, respectively, the marginal and epistatic effect sizes. The
 #' effect sizes are independent and normally-distributed. The \code{mean}
 #' parameter is either a list of vectors or a vector of length 4. If
-#' \code{mean} is a vector, then the effet sizes for each type of effects have
+#' \code{mean} is a vector, then the effect sizes for each type of effects have
 #' the same mean. Otherwise, the corresponding vector in the list
 #' specifies their individual means. The same logic applies to \code{sd}, the
 #' standard deviation parameter. For coherence, the parameters \code{mean} and
@@ -150,7 +150,7 @@ gen_model <- function(nX, nY, nZ12, mean = rep(0, 4), sd = rep(1, 4)) {
   return(model)
 }
 
-#' Simulates a binary phenotye
+#' Simulates a binary phenotype
 #'
 #' The phenotypes are simulated according to a logistic regression model.
 #' Depending on the chosen configuration in \code{\link{sample_SNP}}, the model

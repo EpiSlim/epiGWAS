@@ -2,7 +2,7 @@
 % Please edit documentation in R/model.R
 \name{sim_phenotype}
 \alias{sim_phenotype}
-\title{Simulates a binary phenotye}
+\title{Simulates a binary phenotype}
 \usage{
 sim_phenotype(X, causal, model, intercept = TRUE)
 }

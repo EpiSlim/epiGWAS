@@ -24,7 +24,7 @@ text-align: justify}
 
 In this vignette, we cover the epistasis detection methods implemented in this package. The methods can be partitioned into two main categories: those based on modified outcome, and those based on outcome weighted learning. Both methods recover pure epistatic interactions with a predetermined variant, referred to as the `target`. The `target` can be drawn from the literature, experiments or top hits in previous GWAS. Narrowing the scope around a single variant is made possible by propensity scores [@rosenbaum1983] which, for genomic data, model the linkage disequilibrium (LD) dependency between the `target` and neighboring variants. We include them differently in outcome weighted learning and modified outcome in order to identify the SNPs interacting with the target.
 
-The methods are briefly reviewed in this vignette before showcasing their performace on a dataset of simulated genotypes. For more details, we refer the prospective user to [@Slim2018].
+The methods are briefly reviewed in this vignette before showcasing their performance on a dataset of simulated genotypes. For more details, we refer the prospective user to [@Slim2018].
 
 ## Phenotype-genotype decomposition
 We first consider a triplet of random variables $\left(X, A, Y\right)$:
