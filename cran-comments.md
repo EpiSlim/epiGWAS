@@ -1,5 +1,6 @@
 ## Test environments
 * local OS X install, R 3.5.1
+* Ubuntu, R 3.4.4
 * win-builder (release)
 
 ## CRAN
