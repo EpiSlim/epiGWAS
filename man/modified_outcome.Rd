@@ -33,7 +33,7 @@ In the modified outcome approach, we estimate the risk difference
 The risk difference measures the synergy between \code{A} and the set of
 covariates in \code{X}. For genome-wide associtation studies, it can be
 interpreted as a pure epistatic term. However, for a single sample, we only
-observe one of the two possibilities A=1 or A=0, rendering the direct
+observe one of the two possibilities A=1 or A=0, making the direct
 estimate of the risk difference impossible. Through propensity scores,
 modified outcome was proposed as a solution to this problem. The risk
 difference is recovered by constructing a modified outcome that combines

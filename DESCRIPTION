@@ -1,6 +1,6 @@
 Package: epiGWAS
 Title: Robust Methods for Epistasis Detection
-Version: 0.0.0.9000
+Version: 1.0.0
 Authors@R: c(person("Lotfi", "Slim", email = "lotfi.slim@mines-paristech.fr", role = c("aut", "cre")),
   person("Clément", "Chatelain", email = "clement.chatelain@sanofi.com", role = "ctb"),
   person("Chloé-Agathe", "Azencott", email = "chloe-agathe.azencott@mines-paristech.fr", role ="ctb"),
@@ -32,5 +32,5 @@ Suggests:
 License: GPL (>=2)
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.0.9000
+RoxygenNote: 6.1.1
 VignetteBuilder: knitr

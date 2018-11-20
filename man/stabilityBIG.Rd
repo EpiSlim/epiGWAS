@@ -43,8 +43,8 @@ described in \code{\link{stabilityGLM}}. The sole difference is the use
 of a different elastic net solver. In this function, we make use of
 \code{\link[biglasso]{biglasso}}. Thanks to its parallel
 backend, \code{biglasso} scales well to
-high-dimensional GWAS atasets. However, in our case, because of the use of
-additional backend files, a slight decrease in running time is to be expected,
+high-dimensional GWAS datasets. However, in our case, because of the use of
+additional backend files, a slight decrease in runtime is to be expected,
 compared with \code{\link{stabilityGLM}}.
 }
 \references{
@@ -55,6 +55,10 @@ Studies. BioRxiv.
 Meinshausen, N., & Bühlmann, P. (2010). Stability
 selection. Journal of the Royal Statistical Society: Series B
 (Statistical Methodology), 72(4), 417–473.
+
+Haury, A. C., Mordelet, F., Vera-Licona, P., & Vert, J. P.
+(2012). TIGRESS: Trustful Inference of Gene REgulation using Stability
+Selection. BMC Systems Biology, 6.
 }
 \seealso{
 \code{\link[biglasso]{biglasso-package}}

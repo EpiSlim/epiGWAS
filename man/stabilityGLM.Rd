@@ -36,10 +36,10 @@ curves
 }
 \description{
 To perform model selection, this function scores all covariates in \code{X}
-according to the areas under their stability selection paths. Our model selection
+according to the area under their stability selection paths. Our model selection
 procedure starts by dynamically defining a grid for
 the elastic net penalization parameter \eqn{\lambda}{lambda}. To define the
-grid, we solve the full-dataset elastic net. That yields
+grid, we solve the full-dataset elastic net. This yields
 \code{n_lambda} log-scaled values between \eqn{\lambda_{max}}{lambda_max}
 and \eqn{\lambda_{min}}{lambda_min}. \eqn{\lambda_{max}}{lambda_max} is
 the maximum value for which the elastic net support is not empty. On the other hand,
@@ -51,9 +51,9 @@ solve \code{n_subsample} times the same elastic net, though for a different subs
 The subample is a random selection of half of the samples of the original dataset.
 The empirical frequency of each covariate entering the support is then the number of
 times the covariate is selected in the support as a fraction of \code{n_subsample}.
-We obtain the stability path by associating to each value of \eqn{\lambda}{lambda}
-the corresponding empirical frequency. The final scores are the areas under the
-stability path curves. That is a key difference with the original stability
+We obtain the stability path by associating each value of \eqn{\lambda}{lambda}
+with the corresponding empirical frequency. The final scores are the areas under the
+stability path curves. This is a key difference with the original stability
 selection procedure where the final score is the maximum empirical frequency.
 On simulations, our scoring technique outperformed maximum empirical
 frequencies.
@@ -67,12 +67,16 @@ solution. For that reason, we recommend setting eps << 1.
 }
 \references{
 Slim, L., Chatelain, C., Azencott, C.-A., & Vert, J.-P.
-(2018).Novel Methods for Epistasis Detection in Genome-Wide Association
+(2018). Novel Methods for Epistasis Detection in Genome-Wide Association
 Studies. BioRxiv.
 
 Meinshausen, N., & Bühlmann, P. (2010). Stability
 selection. Journal of the Royal Statistical Society: Series B
 (Statistical Methodology), 72(4), 417–473.
+
+Haury, A. C., Mordelet, F., Vera-Licona, P., & Vert, J. P.
+(2012). TIGRESS: Trustful Inference of Gene REgulation using Stability
+Selection. BMC Systems Biology, 6.
 }
 \seealso{
 \code{\link[glmnet]{glmnet-package}}

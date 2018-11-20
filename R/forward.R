@@ -183,6 +183,13 @@ cond_prob <- function(X, target_name, hmm, binary = FALSE, ncores = 1) {
 #' choice for the number of iterations for the EM algorithm  is between 20
 #' and 25.
 #'
+#' @details We recommend installing the latest development version of the
+#' SNPknock package from Bitbucket with the following command:
+#' \code{devtools::install_bitbucket("msesia/snpknock/R/SNPknock")}. The
+#' reason for this is that the current CRAN release (version 0.7.1) generates
+#' an error because of a stringent condition on the fitted parameters of the
+#' fastPHASE model.
+#'
 #' @references Scheet, P., & Stephens, M. (2006). A fast and flexible
 #' statistical model for large-scale population genotype data: applications
 #' to inferring missing genotypes and haplotypic phase. American Journal of

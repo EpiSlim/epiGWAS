@@ -28,7 +28,7 @@ a vector containing the area under the stability selection path for
 \description{
 Normalized modified outcome is an improvement to \code{\link{modified_outcome}}.
 Its large-sample variance is lower than the original modified outcome approach.
-The only diffrence between the two methods lies in the normalization of the
+The only difference between the two methods lies in the normalization of the
 propensity scores. The inverses of the propensity scores
 \eqn{1/\pi(A=1\lvert X)}{1/P(A=1|X)} and \eqn{1/\pi(A=0\lvert X)}{1/P(A=0|X)} are
 respectively normalized by their sum

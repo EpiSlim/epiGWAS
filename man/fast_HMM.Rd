@@ -41,6 +41,13 @@ recommend setting this parameter to 12. Choosing a higher number does
 not result in a dramatic increase of performance. An optimal
 choice for the number of iterations for the EM algorithm  is between 20
 and 25.
+
+We recommend installing the latest development version of the
+SNPknock package from Bitbucket with the following command:
+\code{devtools::install_bitbucket("msesia/snpknock/R/SNPknock")}. The
+reason for this is that the current CRAN release (version 0.7.1) generates
+an error because of a stringent condition on the fitted parameters of the
+fastPHASE model.
 }
 \references{
 Scheet, P., & Stephens, M. (2006). A fast and flexible

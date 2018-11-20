@@ -31,7 +31,7 @@ a vector containing the area under the stability selection path for
 }
 \description{
 Shifted modified outcome is an improvement to modified outcome. It is
-a heuristic which consists in the addition of of a small translation to
+a heuristic which consists in the addition of of a small translation term to
 the inverse of the propensity score. The goal is to avoid numerical
 instability due to low propensity scores values. More precisely, the
 inverses of the propensity scores become

@@ -76,6 +76,10 @@ subsample <- function(n, size = n %/% 2, n_subsample) {
 #' selection. Journal of the Royal Statistical Society: Series B
 #' (Statistical Methodology), 72(4), 417–473.
 #'
+#' @references Haury, A. C., Mordelet, F., Vera-Licona, P., & Vert, J. P.
+#' (2012). TIGRESS: Trustful Inference of Gene REgulation using Stability
+#' Selection. BMC Systems Biology, 6.
+#'
 #' @seealso \code{\link[glmnet]{glmnet-package}}
 #'
 #' @export
@@ -173,6 +177,10 @@ stabilityGLM <- function(X, Y, weights = rep(1, nrow(X)), family = "gaussian",
 #' @references Meinshausen, N., & Bühlmann, P. (2010). Stability
 #' selection. Journal of the Royal Statistical Society: Series B
 #' (Statistical Methodology), 72(4), 417–473.
+#'
+#' @references Haury, A. C., Mordelet, F., Vera-Licona, P., & Vert, J. P.
+#' (2012). TIGRESS: Trustful Inference of Gene REgulation using Stability
+#' Selection. BMC Systems Biology, 6.
 #'
 #' @seealso \code{\link[biglasso]{biglasso-package}}
 #'
