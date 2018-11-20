@@ -48,7 +48,7 @@ forward_sample <- function(x, p_init, p_trans, p_emit) {
 #' Applies the \code{forward_sample} function to each row in \code{X}. If
 #' the \code{ncores} > 1, the function calling is performed in a parallel
 #' fashion to reduce the running time. The parallelization backend
-#' is \code{doSNOW}.  If the latter package is not installed,
+#' is \code{doParallel}.  If the latter package is not installed,
 #' the function switches back to single-core mode.
 #'
 #' @param X genotype matrix. Each row corresponds to a separate sample
@@ -81,19 +81,19 @@ forward <- function(X, p_init, p_trans, p_emit, ncores = 1) {
         p_trans, p_emit
       )))
   } else {
-    if (requireNamespace("doSNOW", quietly = TRUE)) {
-      cl <- snow::makeCluster(ncores)
-      snow::clusterExport(cl, "forward_sample")
-      doSNOW::registerDoSNOW(cl)
+    if (requireNamespace("doParallel", quietly = TRUE)) {
+      cl <- parallel::makeCluster(ncores)
+      parallel::clusterExport(cl, "forward_sample")
+      doParallel::registerDoParallel(cl)
 
       p_obs <- parallel::parApply(cl, X, 1, function(z) return(forward_sample(
           z,
           p_init, p_trans, p_emit
         )))
 
-      snow::stopCluster(cl)
+      parallel::stopCluster(cl)
     } else {
-      warning("Multithreading requires the installation of the doSNOW package")
+      warning("Multithreading requires the installation of the doParallel package")
       p_obs <- apply(X, 1, function(z) return(forward_sample(
           z, p_init,
           p_trans, p_emit
@@ -182,13 +182,6 @@ cond_prob <- function(X, target_name, hmm, binary = FALSE, ncores = 1) {
 #' not result in a dramatic increase of performance. An optimal
 #' choice for the number of iterations for the EM algorithm  is between 20
 #' and 25.
-#'
-#' @details We recommend installing the latest development version of the
-#' SNPknock package from Bitbucket with the following command:
-#' \code{devtools::install_bitbucket("msesia/snpknock/R/SNPknock")}. The
-#' reason for this is that the current CRAN release (version 0.7.1) generates
-#' an error because of a stringent condition on the fitted parameters of the
-#' fastPHASE model.
 #'
 #' @references Scheet, P., & Stephens, M. (2006). A fast and flexible
 #' statistical model for large-scale population genotype data: applications

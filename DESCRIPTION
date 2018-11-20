@@ -13,16 +13,14 @@ Description: Functions to perform robust epistasis detection in genome-wide
   target and the rest of the genotype. All methods are penalized regression
   approaches, which differently incorporate the propensity score to only
   recover the synergistic effects between the target and the genotype.
-Depends: R (>= 3.5.0)
+Depends: R (>= 3.4.0)
 Imports: matrixStats, DescTools, glmnet, SNPknock
 Suggests: 
     foreach,
     iterators,
-    snow,
-    doSNOW,
-    snpStats,
-    WGCNA,
     precrec,
+    parallel,
+    doParallel,
     bigmemory,
     biglasso,
     testthat,

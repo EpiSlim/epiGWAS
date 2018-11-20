@@ -24,7 +24,7 @@ A vector of log probabilities
 Applies the \code{forward_sample} function to each row in \code{X}. If
 the \code{ncores} > 1, the function calling is performed in a parallel
 fashion to reduce the running time. The parallelization backend
-is \code{doSNOW}.  If the latter package is not installed,
+is \code{doParallel}.  If the latter package is not installed,
 the function switches back to single-core mode.
 }
 \references{
