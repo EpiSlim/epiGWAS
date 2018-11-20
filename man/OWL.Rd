@@ -27,7 +27,7 @@ To recover the synergistic interactions between the target \code{A} and the
 rest of the genotype \code{X}, \code{OWL} formulates a weighted binary
 classification problem. The outcome is the mapping of \code{A} to \{0,1\}. The
 covariates are \code{X}. The propensity scores and the phenotypes are
-combined in the sample weights \eqn{Y/\pi(A\lvert X)}{Y/P(A|X)}. For binary
+combined in the sample weights \eqn{Y/\pi(A| X)}{Y/P(A|X)}. For binary
 phenotypes, OWL is a case-only approach. The approach also accommodates
 nonnegative continuous phenotypes.
 }

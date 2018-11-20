@@ -23,12 +23,12 @@ Otherwise, if \code{FALSE}, we encode a recessive mechanism where the values
 }
 \value{
 Two-column propensity score matrix. The first column lists the
-propensity score \eqn{P\left(A=0\lvert X\right)}{P(A=0|X)}, while the
-second gives \eqn{P\left(A=1\lvert X\right)}{P(A=1|X)}.
+propensity score \eqn{P\left(A=0| X\right)}{P(A=0|X)}, while the
+second gives \eqn{P\left(A=1| X\right)}{P(A=1|X)}.
 }
 \description{
 In this function, and for each sample, we compute both propensity scores
-\eqn{P(A=1\lvert X)}{P(A=1|X)} and \eqn{P(A=0\lvert X)}{P(A=0|X)}. The
+\eqn{P(A=1| X)}{P(A=1|X)} and \eqn{P(A=0| X)}{P(A=0|X)}. The
 application of the forward algorithm on the passed \code{hmm} allows us to
 estimate the joint probability of (A, X), for all values of the target
 variant A = 0, 1, 2. The Bayes formula yields the corresponding conditional

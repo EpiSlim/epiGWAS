@@ -30,8 +30,8 @@ Normalized modified outcome is an improvement to \code{\link{modified_outcome}}.
 Its large-sample variance is lower than the original modified outcome approach.
 The only difference between the two methods lies in the normalization of the
 propensity scores. The inverses of the propensity scores
-\eqn{1/\pi(A=1\lvert X)}{1/P(A=1|X)} and \eqn{1/\pi(A=0\lvert X)}{1/P(A=0|X)} are
+\eqn{1/\pi(A=1| X)}{1/P(A=1|X)} and \eqn{1/\pi(A=0| X)}{1/P(A=0|X)} are
 respectively normalized by their sum
-\eqn{\sum_{i} 1/\pi(A_i=1\lvert X_i)}{sum _i 1/P(A_i=1|X_i)} and
-\eqn{\sum_{i} 1/\pi(A_i=0\lvert X_i)}{sum _i 1/P(A_i=0|X_i)}.
+\eqn{\sum_{i} 1/\pi(A_i=1| X_i)}{sum _i 1/P(A_i=1|X_i)} and
+\eqn{\sum_{i} 1/\pi(A_i=0| X_i)}{sum _i 1/P(A_i=0|X_i)}.
 }

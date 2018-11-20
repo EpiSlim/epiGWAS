@@ -35,6 +35,6 @@ a heuristic which consists in the addition of of a small translation term to
 the inverse of the propensity score. The goal is to avoid numerical
 instability due to low propensity scores values. More precisely, the
 inverses of the propensity scores become
-\eqn{1/(\pi(A\lvert X) + \xi)}{1/(P(A|X) + shift)}. We recommend keeping
+\eqn{1/(\pi(A| X) + \xi)}{1/(P(A|X) + shift)}. We recommend keeping
 the default value of the parameter \eqn{\xi}{shift} at 0.1.
 }

@@ -32,7 +32,7 @@ modified outcome approaches.
 Except for \code{shifted_outcome}, all of
 the modified outcome approaches belong to a parameterized class of unbiased
 estimators for the risk difference term
-\eqn{\mathbb{E}\left[Y\lvert A=1,X\right]-\mathbb{E}\left[Y\lvert A=0,X\right]}{E[Y|A=1,X]-E[Y|A=0,X]}.
+\eqn{E\left[Y| A=1,X\right]-E\left[Y| A=0,X\right]}{E[Y|A=1,X]-E[Y|A=0,X]}.
 Within that class, robust modified outcome is the approach with the least
 large-sample variance. For more details about this approach, see Lunceford
 and Davidian (2004)

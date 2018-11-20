@@ -4,7 +4,7 @@
 #' rest of the genotype \code{X}, \code{OWL} formulates a weighted binary
 #' classification problem. The outcome is the mapping of \code{A} to \{0,1\}. The
 #' covariates are \code{X}. The propensity scores and the phenotypes are
-#' combined in the sample weights \eqn{Y/\pi(A\lvert X)}{Y/P(A|X)}. For binary
+#' combined in the sample weights \eqn{Y/\pi(A| X)}{Y/P(A|X)}. For binary
 #' phenotypes, OWL is a case-only approach. The approach also accommodates
 #' nonnegative continuous phenotypes.
 #'
@@ -77,7 +77,7 @@ OWL <- function(A, X, Y, propensity, ...) {
 #' Implements the modified outcome approach
 #'
 #' In the modified outcome approach, we estimate the risk difference
-#' \eqn{\mathbb{E}\left[Y\lvert A=1,X\right]-\mathbb{E}\left[Y\lvert A=0,X\right]}{E[Y|A=1,X]-E[Y|A=0,X]}.
+#' \eqn{E\left[Y| A=1,X\right]-E\left[Y| A=0,X\right]}{E[Y|A=1,X]-E[Y|A=0,X]}.
 #' The risk difference measures the synergy between \code{A} and the set of
 #' covariates in \code{X}. For genome-wide association studies, it can be
 #' interpreted as a pure epistatic term. However, for a single sample, we only
@@ -85,8 +85,8 @@ OWL <- function(A, X, Y, propensity, ...) {
 #' estimate of the risk difference impossible. Through propensity scores,
 #' modified outcome was proposed as a solution to this problem. The risk
 #' difference is recovered by constructing a modified outcome that combines
-#' A, Y and the propensity score \eqn{\pi(A\lvert X)}{P(A|X)}:
-#' \eqn{Y \times \left[\frac{A}{\pi(A=1\lvert X)} - \frac{1-A}{1-\pi(A=1\lvert X)} \right]}{Y x [A/P(A=1|X) -(1-A)/P(A=0|X)]}.
+#' A, Y and the propensity score \eqn{\pi(A| X)}{P(A|X)}:
+#' \eqn{Y \times \left[\frac{A}{\pi(A=1| X)} - \frac{1-A}{1-\pi(A=1| X)} \right]}{Y x [A/P(A=1|X) -(1-A)/P(A=0|X)]}.
 #' The use of \code{\link{stabilityGLM}} or \code{\link{stabilityBIG}} for
 #' the modified outcome regression allows us to recover the
 #' interacting components within \code{X}.
@@ -95,8 +95,8 @@ OWL <- function(A, X, Y, propensity, ...) {
 #' @param X rest of the genotype
 #' @param Y phenotype
 #' @param propensity propensity scores vector/matrix. If given as a matrix,
-#' the first column is \eqn{\pi(A = 0\lvert X)}{P(A = 0|X)} while the second
-#' is \eqn{\pi(A = 1\lvert X)}{P(A = 1|X)}
+#' the first column is \eqn{\pi(A = 0| X)}{P(A = 0|X)} while the second
+#' is \eqn{\pi(A = 1| X)}{P(A = 1|X)}
 #' @param parallel whether to perform support estimation in a
 #' parallelized fashion with the \code{\link{stabilityBIG}} function
 #' @param ... additional arguments to be passed to \code{stabilityGLM} or
@@ -153,10 +153,10 @@ modified_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
 #' Its large-sample variance is lower than the original modified outcome approach.
 #' The only difference between the two methods lies in the normalization of the
 #' propensity scores. The inverses of the propensity scores
-#' \eqn{1/\pi(A=1\lvert X)}{1/P(A=1|X)} and \eqn{1/\pi(A=0\lvert X)}{1/P(A=0|X)} are
+#' \eqn{1/\pi(A=1| X)}{1/P(A=1|X)} and \eqn{1/\pi(A=0| X)}{1/P(A=0|X)} are
 #' respectively normalized by their sum
-#' \eqn{\sum_{i} 1/\pi(A_i=1\lvert X_i)}{sum _i 1/P(A_i=1|X_i)} and
-#' \eqn{\sum_{i} 1/\pi(A_i=0\lvert X_i)}{sum _i 1/P(A_i=0|X_i)}.
+#' \eqn{\sum_{i} 1/\pi(A_i=1| X_i)}{sum _i 1/P(A_i=1|X_i)} and
+#' \eqn{\sum_{i} 1/\pi(A_i=0| X_i)}{sum _i 1/P(A_i=0|X_i)}.
 #'
 #' @param A target variant
 #' @param X rest of the genotype
@@ -219,7 +219,7 @@ normalized_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
 #' the inverse of the propensity score. The goal is to avoid numerical
 #' instability due to low propensity scores values. More precisely, the
 #' inverses of the propensity scores become
-#' \eqn{1/(\pi(A\lvert X) + \xi)}{1/(P(A|X) + shift)}. We recommend keeping
+#' \eqn{1/(\pi(A| X) + \xi)}{1/(P(A|X) + shift)}. We recommend keeping
 #' the default value of the parameter \eqn{\xi}{shift} at 0.1.
 #'
 #' @param A target variant
@@ -285,7 +285,7 @@ shifted_outcome <- function(A, X, Y, propensity, parallel = FALSE, shift = 0.1,
 #' Except for \code{shifted_outcome}, all of
 #' the modified outcome approaches belong to a parameterized class of unbiased
 #' estimators for the risk difference term
-#' \eqn{\mathbb{E}\left[Y\lvert A=1,X\right]-\mathbb{E}\left[Y\lvert A=0,X\right]}{E[Y|A=1,X]-E[Y|A=0,X]}.
+#' \eqn{E\left[Y| A=1,X\right]-E\left[Y| A=0,X\right]}{E[Y|A=1,X]-E[Y|A=0,X]}.
 #' Within that class, robust modified outcome is the approach with the least
 #' large-sample variance. For more details about this approach, see Lunceford
 #' and Davidian (2004)
