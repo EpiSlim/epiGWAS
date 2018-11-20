@@ -81,7 +81,7 @@ OWL <- function(A, X, Y, propensity, ...) {
 #' The risk difference measures the synergy between \code{A} and the set of
 #' covariates in \code{X}. For genome-wide associtation studies, it can be
 #' interpreted as a pure epistatic term. However, for a single sample, we only
-#' observe one of the two possibilities A=1 or A=0, rendering the direct
+#' observe one of the two possibilities A=1 or A=0, making the direct
 #' estimate of the risk difference impossible. Through propensity scores,
 #' modified outcome was proposed as a solution to this problem. The risk
 #' difference is recovered by constructing a modified outcome that combines
@@ -151,7 +151,7 @@ modified_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
 #'
 #' Normalized modified outcome is an improvement to \code{\link{modified_outcome}}.
 #' Its large-sample variance is lower than the original modified outcome approach.
-#' The only diffrence between the two methods lies in the normalization of the
+#' The only difference between the two methods lies in the normalization of the
 #' propensity scores. The inverses of the propensity scores
 #' \eqn{1/\pi(A=1\lvert X)}{1/P(A=1|X)} and \eqn{1/\pi(A=0\lvert X)}{1/P(A=0|X)} are
 #' respectively normalized by their sum
@@ -215,7 +215,7 @@ normalized_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
 #' Implements the shifted modified outcome approach
 #'
 #' Shifted modified outcome is an improvement to modified outcome. It is
-#' a heuristic which consists in the addition of of a small translation to
+#' a heuristic which consists in the addition of of a small translation term to
 #' the inverse of the propensity score. The goal is to avoid numerical
 #' instability due to low propensity scores values. More precisely, the
 #' inverses of the propensity scores become
