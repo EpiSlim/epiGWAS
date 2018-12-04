@@ -4,7 +4,8 @@
 * win-builder (release)
 
 ## CRAN
-This is the first submission to CRAN
+This is my second submission to CRAN. I added examples to all .Rd files, as
+requested by the CRAN reviewer. 
 
 ## R CMD check results
 There were no ERRORs or WARNING or NOTES.
