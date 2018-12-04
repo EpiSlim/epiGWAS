@@ -21,3 +21,10 @@ and \code{n_subsample} columns.
 The subsampling is iteratively performed in order to generate
 multiple subsamples of a predetermined size.
 }
+\examples{
+n <- 50 # Total number of samples
+n_subsample <- 10 # Number of subsamples
+
+sub_matrix <- subsample(n = n, n_subsample = n_subsample)
+
+}

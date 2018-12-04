@@ -35,3 +35,15 @@ respectively normalized by their sum
 \eqn{\sum_{i} 1/\pi(A_i=1| X_i)}{sum _i 1/P(A_i=1|X_i)} and
 \eqn{\sum_{i} 1/\pi(A_i=0| X_i)}{sum _i 1/P(A_i=0|X_i)}.
 }
+\examples{
+n <- 30
+p <- 10
+X <- matrix((runif(n * p) < 0.5) + (runif(n * p) < 0.5),
+             ncol = p, nrow = n) # SNP matrix
+A <- (runif(n) < 0.3)
+propensity <- runif(n, min = 0.4, max = 0.8)
+Y <- runif(n) < 0.4
+normalized_scores <- normalized_outcome(A, X, Y, propensity,
+                               lambda_min_ratio = 0.02 , n_subsample = 1)
+
+}

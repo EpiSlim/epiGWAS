@@ -10,6 +10,13 @@
 #' @return a matrix of indices with \code{size} rows
 #' and \code{n_subsample} columns.
 #'
+#' @examples
+#' n <- 50 # Total number of samples
+#' n_subsample <- 10 # Number of subsamples
+#'
+#' sub_matrix <- subsample(n = n, n_subsample = n_subsample)
+#'
+#' @export
 subsample <- function(n, size = n %/% 2, n_subsample) {
   idx <- array(dim = c(size, n_subsample))
   for (i in seq_len(n_subsample)) {
@@ -79,6 +86,23 @@ subsample <- function(n, size = n %/% 2, n_subsample) {
 #' @references Haury, A. C., Mordelet, F., Vera-Licona, P., & Vert, J. P.
 #' (2012). TIGRESS: Trustful Inference of Gene REgulation using Stability
 #' Selection. BMC Systems Biology, 6.
+#'
+#' @examples
+#' # ---- Continuous data ----
+#' n <- 50
+#' p <- 20
+#' X <- matrix(rnorm(n * p), ncol = p)
+#' Y <- crossprod(t(X), rnorm(p))
+#' aucs_cont <- stabilityGLM(X, Y, family = "gaussian", n_subsample = 1,
+#'                           short = FALSE)
+#'
+#' # ---- Binary data ----
+#' X <- matrix(rnorm(n * p), ncol = p)
+#' Y <- runif(n, min = 0, max = 1) < 1/ (1 + exp(-X[, c(1, 7, 15)] %*% rnorm(3)))
+#' weights <- runif(n, min = 0.4, max = 0.8)
+#' aucs_binary <- stabilityGLM(X, Y, weights = weights,
+#'                             n_lambda = 50, lambda_min_ratio = 0.05, n_subsample = 1)
+#'
 #'
 #' @seealso \code{\link[glmnet]{glmnet-package}}
 #'
@@ -183,6 +207,14 @@ stabilityGLM <- function(X, Y, weights = rep(1, nrow(X)), family = "gaussian",
 #' Selection. BMC Systems Biology, 6.
 #'
 #' @seealso \code{\link[biglasso]{biglasso-package}}
+#'
+#' @examples
+#' n <- 100
+#' p <- 25
+#' X <- bigmemory::as.big.matrix(matrix(runif(n * p), ncol = p))
+#' Y <- runif(n, min = 0, max = 1) < 0.5
+#' aucBIG <- stabilityBIG(X, Y, family = "binomial", short = TRUE,
+#'                        ncores = 1, n_lambda = 200, n_subsample = 1)
 #'
 #' @export
 stabilityBIG <- function(X, Y, family = "gaussian", n_subsample = 20, n_lambda = 100,

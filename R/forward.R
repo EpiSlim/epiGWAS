@@ -22,6 +22,28 @@
 #' and selected applications in speech recognition.' Proceedings of the
 #' IEEE 77.2 (1989): 257-286.
 #'
+#' @examples
+#' p <- 3 # Number of states
+#' K <- 2 # Dimensionality of the latent space
+#'
+#' p_init <- rep(1 / K, K)
+#' p_trans <- array(runif((p - 1) * K * K), c(p - 1, K, K))
+#' # Normalizing the transition probabilities
+#' for (j in seq_len(p - 1)) {
+#'   p_trans[j, , ] <- p_trans[j, , ] / (matrix(rowSums(p_trans[j, , ]), ncol = 1) %*% rep(1, K))
+#' }
+#'
+#' p_emit <- array(stats::runif(p * 3 * K), c(p, 3, K))
+#' # Normalizing the emission probabilities
+#' for (j in seq_len(p)) {
+#'   p_emit[j, , ] <- p_emit[j, , ] / (matrix(rep(1, 3), ncol = 1) %*% colSums(p_emit[j, , ]))
+#' }
+#'
+#' X <- (runif(p, min = 0, max = 1) < 0.5) + (runif(p, min = 0, max = 1) < 0.5)
+#'
+#' # Computing the joint log-probabilities
+#' log_prob <- forward_sample(X, p_init, p_trans, p_emit)
+#'
 #' @export
 forward_sample <- function(x, p_init, p_trans, p_emit) {
   stopifnot((length(dim(p_trans)) == 3) & (length(dim(p_emit)) == 3) &
@@ -62,6 +84,30 @@ forward_sample <- function(x, p_init, p_trans, p_emit) {
 #' @references Rabiner, Lawrence R. 'A tutorial on hidden Markov models
 #' and selected applications in speech recognition.' Proceedings of the
 #' IEEE 77.2 (1989): 257-286.
+#'
+#' @examples
+#' p <- 3 # Number of states
+#' K <- 2 # Dimensionality of the latent space
+#'
+#' p_init <- rep(1 / K, K)
+#' p_trans <- array(runif((p - 1) * K * K), c(p - 1, K, K))
+#' # Normalizing the transition probabilities
+#' for (j in seq_len(p - 1)) {
+#'   p_trans[j, , ] <- p_trans[j, , ] / (matrix(rowSums(p_trans[j, , ]), ncol = 1) %*% rep(1, K))
+#' }
+#'
+#' p_emit <- array(stats::runif(p * 3 * K), c(p, 3, K))
+#' # Normalizing the emission probabilities
+#' for (j in seq_len(p)) {
+#'   p_emit[j, , ] <- p_emit[j, , ] / (matrix(rep(1, 3), ncol = 1) %*% colSums(p_emit[j, , ]))
+#' }
+#'
+#' n <- 2
+#' X <- matrix((runif(n * p, min = 0, max = 1) < 0.4) +
+#'             (runif(n * p, min = 0, max = 1) < 0.4), nrow = 2)
+#'
+#' # Computing the joint log-probabilities
+#' log_prob <- forward(X, p_init, p_trans, p_emit)
 #'
 #' @export
 forward <- function(X, p_init, p_trans, p_emit, ncores = 1) {
@@ -130,6 +176,32 @@ forward <- function(X, p_init, p_trans, p_emit, ncores = 1) {
 #'
 #' @seealso \code{\link{fast_HMM}}
 #'
+#' @examples
+#' p <- 3 # Number of states
+#' K <- 2 # Dimensionality of the latent space
+#'
+#' p_init <- rep(1 / K, K)
+#' p_trans <- array(runif((p - 1) * K * K), c(p - 1, K, K))
+#' # Normalizing the transition probabilities
+#' for (j in seq_len(p - 1)) {
+#'   p_trans[j, , ] <- p_trans[j, , ] / (matrix(rowSums(p_trans[j, , ]), ncol = 1) %*% rep(1, K))
+#' }
+#'
+#' p_emit <- array(stats::runif(p * 3 * K), c(p, 3, K))
+#' # Normalizing the emission probabilities
+#' for (j in seq_len(p)) {
+#'   p_emit[j, , ] <- p_emit[j, , ] / (matrix(rep(1, 3), ncol = 1) %*% colSums(p_emit[j, , ]))
+#' }
+#'
+#' hmm <- list(pInit = p_init, Q = p_trans, pEmit = p_emit)
+#'
+#' n <- 2
+#' X <- matrix((runif(n * p, min = 0, max = 1) < 0.4) +
+#'             (runif(n * p, min = 0, max = 1) < 0.4),
+#'             nrow = 2, dimnames = list(NULL, paste0("SNP_", seq_len(p))))
+#'
+#' cond_prob(X, "SNP_2", hmm, ncores = 1, binary = TRUE)
+#'
 #' @export
 cond_prob <- function(X, target_name, hmm, binary = FALSE, ncores = 1) {
   stopifnot(!is.null(colnames(X)))
@@ -188,6 +260,17 @@ cond_prob <- function(X, target_name, hmm, binary = FALSE, ncores = 1) {
 #' to inferring missing genotypes and haplotypic phase. American Journal of
 #' Human Genetics, 78(4), 629–644.
 #'
+#' @examples
+#' \dontrun{
+#' p <- 50
+#' n <- 100
+#' genotypes <- matrix((runif(n * p, min = 0, max = 1) < 0.5) +
+#'             (runif(n * p, min = 0, max = 1) < 0.5),
+#'             nrow = n, dimnames = list(NULL, paste0("SNP_", seq_len(p))))
+#'
+#' hmm <- fast_HMM(genotypes, fp_path = "/path/to/fastPHASE",
+#'                 n_state = 4, n_iter = 10)
+#' }
 #'
 #' @export
 fast_HMM <- function(X, out_path = NULL, X_filename = NULL, fp_path = "bin/fastPHASE",

@@ -38,3 +38,17 @@ inverses of the propensity scores become
 \eqn{1/(\pi(A| X) + \xi)}{1/(P(A|X) + shift)}. We recommend keeping
 the default value of the parameter \eqn{\xi}{shift} at 0.1.
 }
+\examples{
+\dontrun{
+n <- 30
+p <- 10
+X <- matrix((runif(n * p) < 0.5) + (runif(n * p) < 0.5),
+             ncol = p, nrow = n) # SNP matrix
+A <- (runif(n) < 0.3)
+propensity <- runif(n, min = 0.4, max = 0.8)
+Y <- runif(n) < 1/ (1 + exp(-X[, 2, drop = FALSE]))
+shifted_scores <- shifted_outcome(A, X, Y, propensity,
+                               shift = 0.1, n_subsample = 1)
+}
+
+}

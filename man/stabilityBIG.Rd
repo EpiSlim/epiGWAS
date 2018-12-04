@@ -47,6 +47,15 @@ high-dimensional GWAS datasets. However, in our case, because of the use of
 additional backend files, a slight decrease in runtime is to be expected,
 compared with \code{\link{stabilityGLM}}.
 }
+\examples{
+n <- 100
+p <- 25
+X <- bigmemory::as.big.matrix(matrix(runif(n * p), ncol = p))
+Y <- runif(n, min = 0, max = 1) < 0.5
+aucBIG <- stabilityBIG(X, Y, family = "binomial", short = TRUE,
+                       ncores = 1, n_lambda = 200, n_subsample = 1)
+
+}
 \references{
 Slim, L., Chatelain, C., Azencott, C.-A., & Vert, J.-P.
 (2018). Novel Methods for Epistasis Detection in Genome-Wide Association

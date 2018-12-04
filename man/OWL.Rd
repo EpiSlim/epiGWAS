@@ -35,6 +35,16 @@ nonnegative continuous phenotypes.
 For continuous phenotypes, if the outcome \code{Y} is
   not nonnegative, it is translated to make it nonnegative.
 }
+\examples{
+n <- 30
+p <- 10
+X <- matrix((runif(n * p) < 0.5) + (runif(n * p) < 0.5), ncol = p, nrow = n)
+A <- (runif(n, min = 0, max = 1) < 0.3)
+propensity <- runif(n, min = 0.4, max = 0.8)
+Y <- runif(n, min = 0, max = 1) < 1/ (1 + exp(-X[, c(1, 7)] \%*\% rnorm(2)))
+OWL(A, X, Y, propensity, short = FALSE, n_lambda = 50, n_subsample = 1)
+
+}
 \references{
 Zhao, Y., Zeng, D., Rush, A. J., & Kosorok, M. R. (2012).
   Estimating Individualized Treatment Rules Using Outcome Weighted Learning.

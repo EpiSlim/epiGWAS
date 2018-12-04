@@ -42,6 +42,19 @@ not result in a dramatic increase of performance. An optimal
 choice for the number of iterations for the EM algorithm  is between 20
 and 25.
 }
+\examples{
+\dontrun{
+p <- 50
+n <- 100
+genotypes <- matrix((runif(n * p, min = 0, max = 1) < 0.5) +
+            (runif(n * p, min = 0, max = 1) < 0.5),
+            nrow = n, dimnames = list(NULL, paste0("SNP_", seq_len(p))))
+
+hmm <- fast_HMM(genotypes, fp_path = "/path/to/fastPHASE",
+                n_state = 4, n_iter = 10)
+}
+
+}
 \references{
 Scheet, P., & Stephens, M. (2006). A fast and flexible
 statistical model for large-scale population genotype data: applications

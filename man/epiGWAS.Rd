@@ -37,6 +37,21 @@ methods implemented in this package. If \code{methods} is \code{"all"}, we run
 selection of those methods. In this case, the \code{methods} argument is a
 character vector with its entries being the names of the functions to call.
 }
+\examples{
+n <- 20
+p <- 8
+X <- matrix((runif(n * p) < 0.4) + (runif(n * p) < 0.4),
+             ncol = p, nrow = n) # SNP matrix
+A <- rbinom(n, 1, 0.3)
+propensity <- runif(n, min = 0.4, max = 0.8)
+Y <- rnorm(n)
+aucs <- epiGWAS(A, X, Y, propensity, lambda_min_ratio = 0.01, parallel = FALSE,
+                 shift = 0.2, n_subsample = 1, short = TRUE, eps = 1e-4,
+                 methods = c("normalized_outcome", "robust_outcome"))
+
+names(aucs)
+
+}
 \seealso{
 \code{OWL}, \code{modified_outcome}, \code{shifted_outcome},
     \code{normalized_outcome} and \code{robust_outcome}

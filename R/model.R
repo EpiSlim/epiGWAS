@@ -43,6 +43,14 @@
 #'   epistatic pair is obtained from the combination of two SNPs with
 #'   identical positions in \code{inter1} and \code{inter2}.
 #'
+#' @examples
+#' clusters <- rep(seq_len(10), each = 3)
+#' names(clusters) <- paste0("SNP_", seq_along(clusters))
+#' MAF <- runif(length(clusters), min = 0.1, max = 0.5)
+#'
+#' sample_SNP(nX = 2, nY = 2, nZ12 = 1, clusters, MAF, thresh_MAF = 0.2,
+#'            window_size = 2, overlap_marg = 1, overlap_inter = 0)
+#'
 #' @export
 sample_SNP <- function(nX, nY, nZ12, clusters, MAF, thresh_MAF = 0.2, window_size = 3,
                        overlap_marg = 0, overlap_inter = 0, max_iter = 10000) {
@@ -124,6 +132,10 @@ sample_SNP <- function(nX, nY, nZ12, clusters, MAF, thresh_MAF = 0.2, window_siz
 #'
 #' @return a list of vectors corresponding to the effect size coefficients.
 #'
+#' @examples
+#' effect_sizes <- gen_model(nX = 2, nY = 2, nZ12 = 1,
+#'                           mean = rep(1, 4), sd = rep(1, 4))
+#'
 #' @export
 gen_model <- function(nX, nY, nZ12, mean = rep(0, 4), sd = rep(1, 4)) {
   stopifnot(length(mean) == 4)
@@ -170,6 +182,27 @@ gen_model <- function(nX, nY, nZ12, mean = rep(0, 4), sd = rep(1, 4)) {
 #'   factor (TRUE/FALSE).
 #'
 #' @seealso \code{\link{sample_SNP}} and \code{\link{gen_model}}
+#'
+#' @examples
+#' nX <- 5
+#' nY <- 3
+#' nZ12 <- 2
+#' clusters <- rep(seq_len(25), each = 3)
+#' names(clusters) <- paste0("SNP_", seq_along(clusters))
+#' MAF <- runif(length(clusters), min = 0.2, max = 0.5)
+#'
+#' n_samples <- 3
+#' X <- matrix((runif(n_samples * length(clusters)) < 0.4) +
+#'             (runif(n_samples * length(clusters)) < 0.4),
+#'             ncol = length(clusters), nrow = n_samples)
+#'
+#' colnames(X) <- names(clusters)
+#'
+#' causal <- sample_SNP(
+#'  nX, nY, nZ12, clusters, MAF, thresh_MAF = 0.2, window_size = 2,
+#'  overlap_inter = 0)
+#' model <- gen_model(nX, nY, nZ12, mean = rnorm(4), sd = rep(1, 4))
+#' Y <- sim_phenotype(X, causal, model, intercept = TRUE)
 #'
 #' @export
 sim_phenotype <- function(X, causal, model, intercept = TRUE) {

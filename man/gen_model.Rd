@@ -36,3 +36,8 @@ specifies their individual means. The same logic applies to \code{sd}, the
 standard deviation parameter. For coherence, the parameters \code{mean} and
 \code{sd} are encoded in the same order as the output.
 }
+\examples{
+effect_sizes <- gen_model(nX = 2, nY = 2, nZ12 = 1,
+                          mean = rep(1, 4), sd = rep(1, 4))
+
+}

@@ -25,6 +25,15 @@
 #'   Estimating Individualized Treatment Rules Using Outcome Weighted Learning.
 #'   Journal of the American Statistical Association, 107(499), 1106–1118.
 #'
+#' @examples
+#' n <- 30
+#' p <- 10
+#' X <- matrix((runif(n * p) < 0.5) + (runif(n * p) < 0.5), ncol = p, nrow = n)
+#' A <- (runif(n, min = 0, max = 1) < 0.3)
+#' propensity <- runif(n, min = 0.4, max = 0.8)
+#' Y <- runif(n, min = 0, max = 1) < 1/ (1 + exp(-X[, c(1, 7)] %*% rnorm(2)))
+#' OWL(A, X, Y, propensity, short = FALSE, n_lambda = 50, n_subsample = 1)
+#'
 #' @export
 OWL <- function(A, X, Y, propensity, ...) {
   owl_args <- list(...)
@@ -109,6 +118,16 @@ OWL <- function(A, X, Y, propensity, ...) {
 #' the propensity score in observational studies for causal effects.'
 #' Biometrika 70.1 (1983): 41-55.
 #'
+#' @examples
+#' n <- 30
+#' p <- 10
+#' X <- matrix((runif(n * p) < 0.5) + (runif(n * p) < 0.5), ncol = p, nrow = n)
+#' A <- (runif(n, min = 0, max = 1) < 0.3)
+#' propensity <- runif(n, min = 0.4, max = 0.8)
+#' Y <- runif(n) < 1/ (1 + exp(- 2 * X[, 5, drop = FALSE]))
+#' auc_scores <- modified_outcome(A, X, Y, propensity,
+#'                                ncores = 1, parallel = TRUE, n_subsample = 1)
+#'
 #' @export
 modified_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
   mod_args <- list(...)
@@ -169,6 +188,17 @@ modified_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
 #'
 #' @return a vector containing the area under the stability selection path for
 #'   each variable in \code{X}
+#'
+#' @examples
+#' n <- 30
+#' p <- 10
+#' X <- matrix((runif(n * p) < 0.5) + (runif(n * p) < 0.5),
+#'              ncol = p, nrow = n) # SNP matrix
+#' A <- (runif(n) < 0.3)
+#' propensity <- runif(n, min = 0.4, max = 0.8)
+#' Y <- runif(n) < 0.4
+#' normalized_scores <- normalized_outcome(A, X, Y, propensity,
+#'                                lambda_min_ratio = 0.02 , n_subsample = 1)
 #'
 #' @export
 normalized_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
@@ -235,6 +265,19 @@ normalized_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
 #'
 #' @return a vector containing the area under the stability selection path for
 #'   each variable in \code{X}
+#'
+#' @examples
+#' \dontrun{
+#' n <- 30
+#' p <- 10
+#' X <- matrix((runif(n * p) < 0.5) + (runif(n * p) < 0.5),
+#'              ncol = p, nrow = n) # SNP matrix
+#' A <- (runif(n) < 0.3)
+#' propensity <- runif(n, min = 0.4, max = 0.8)
+#' Y <- runif(n) < 1/ (1 + exp(-X[, 2, drop = FALSE]))
+#' shifted_scores <- shifted_outcome(A, X, Y, propensity,
+#'                                shift = 0.1, n_subsample = 1)
+#' }
 #'
 #' @export
 shifted_outcome <- function(A, X, Y, propensity, parallel = FALSE, shift = 0.1,
@@ -305,6 +348,17 @@ shifted_outcome <- function(A, X, Y, propensity, parallel = FALSE, shift = 0.1,
 #' @references Lunceford, J. K., & Davidian, M. (2004). Stratification and
 #' weighting via the propensity score in estimation of causal treatment effects:
 #' A comparative study. Statistics in Medicine, 23(19), 2937–2960.
+#'
+#' @examples
+#' n <- 30
+#' p <- 10
+#' X <- matrix((runif(n * p) < 0.4) + (runif(n * p) < 0.4),
+#'              ncol = p, nrow = n) # SNP matrix
+#' A <- rbinom(n, 1, 0.3)
+#' propensity <- runif(n, min = 0.4, max = 0.8)
+#' Y <- runif(n) < 0.4
+#' robust_scores <- robust_outcome(A, X, Y, propensity,
+#'                                lambda_min_ratio = 0.01 , n_subsample = 1)
 #'
 #' @export
 robust_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
@@ -383,6 +437,20 @@ robust_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
 #'
 #' @seealso \code{OWL}, \code{modified_outcome}, \code{shifted_outcome},
 #'     \code{normalized_outcome} and \code{robust_outcome}
+#'
+#' @examples
+#' n <- 20
+#' p <- 8
+#' X <- matrix((runif(n * p) < 0.4) + (runif(n * p) < 0.4),
+#'              ncol = p, nrow = n) # SNP matrix
+#' A <- rbinom(n, 1, 0.3)
+#' propensity <- runif(n, min = 0.4, max = 0.8)
+#' Y <- rnorm(n)
+#' aucs <- epiGWAS(A, X, Y, propensity, lambda_min_ratio = 0.01, parallel = FALSE,
+#'                  shift = 0.2, n_subsample = 1, short = TRUE, eps = 1e-4,
+#'                  methods = c("normalized_outcome", "robust_outcome"))
+#'
+#' names(aucs)
 #'
 #' @export
 epiGWAS <- function(A, X, Y, propensity, methods = "all", parallel = TRUE, shift = 0.1, ...) {
