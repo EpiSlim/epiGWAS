@@ -43,7 +43,7 @@ choice for the number of iterations for the EM algorithm  is between 20
 and 25.
 }
 \examples{
-\dontrun{
+\donttest{
 p <- 50
 n <- 100
 genotypes <- matrix((runif(n * p, min = 0, max = 1) < 0.5) +

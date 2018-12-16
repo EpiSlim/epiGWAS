@@ -14,6 +14,9 @@ knitr::opts_chunk$set(
 ```
 # epiGWAS
 
+[![Rdoc](http://www.rdocumentation.org/badges/version/epiGWAS)](http://www.rdocumentation.org/packages/epiGWAS)
+[![Travis build status](https://travis-ci.org/EpiSlim/epiGWAS.svg?branch=master)](https://travis-ci.org/EpiSlim/epiGWAS)
+
 This package implements a number of methods for detecting pure epistatic interactions with a predetermined target variant. The common denominator lies in the use of propensity scores to filter out the main effects of the rest of genotype. The methods incorporate propensity scores in two different ways: either in the sample weights (outcome weighted learning) or in the response (modified outcome).  
 
 ## Installation

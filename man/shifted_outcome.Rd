@@ -39,7 +39,7 @@ inverses of the propensity scores become
 the default value of the parameter \eqn{\xi}{shift} at 0.1.
 }
 \examples{
-\dontrun{
+\donttest{
 n <- 30
 p <- 10
 X <- matrix((runif(n * p) < 0.5) + (runif(n * p) < 0.5),

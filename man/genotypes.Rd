@@ -19,7 +19,7 @@ Only the markers of the Affymetrix 500K are included.
 }
 \examples{
 data(genotypes)
-\dontrun{
+\donttest{
 hmm <- fast_HMM(genotypes, fp_path = '/path/to/fastPHASE')
 }
 }
