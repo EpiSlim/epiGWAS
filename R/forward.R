@@ -261,7 +261,7 @@ cond_prob <- function(X, target_name, hmm, binary = FALSE, ncores = 1) {
 #' Human Genetics, 78(4), 629–644.
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' p <- 50
 #' n <- 100
 #' genotypes <- matrix((runif(n * p, min = 0, max = 1) < 0.5) +

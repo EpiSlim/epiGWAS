@@ -267,7 +267,7 @@ normalized_outcome <- function(A, X, Y, propensity, parallel = FALSE, ...) {
 #'   each variable in \code{X}
 #'
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' n <- 30
 #' p <- 10
 #' X <- matrix((runif(n * p) < 0.5) + (runif(n * p) < 0.5),
