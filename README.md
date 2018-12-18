@@ -6,6 +6,8 @@
 [![Rdoc](http://www.rdocumentation.org/badges/version/epiGWAS)](http://www.rdocumentation.org/packages/epiGWAS)
 [![Travis build
 status](https://travis-ci.org/EpiSlim/epiGWAS.svg?branch=master)](https://travis-ci.org/EpiSlim/epiGWAS)
+![CRAN Downloads
+overall](http://cranlogs.r-pkg.org/badges/grand-total/epiGWAS)
 
 This package implements a number of methods for detecting pure epistatic
 interactions with a predetermined target variant. The common denominator
