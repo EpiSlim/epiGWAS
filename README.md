@@ -4,6 +4,8 @@
 # epiGWAS
 
 [![Rdoc](http://www.rdocumentation.org/badges/version/epiGWAS)](http://www.rdocumentation.org/packages/epiGWAS)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/epiGWAS)](https://cran.r-project.org/package=epiGWAS)
 [![Travis build
 status](https://travis-ci.org/EpiSlim/epiGWAS.svg?branch=master)](https://travis-ci.org/EpiSlim/epiGWAS)
 ![CRAN Downloads
