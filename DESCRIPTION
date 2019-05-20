@@ -1,6 +1,6 @@
 Package: epiGWAS
 Title: Robust Methods for Epistasis Detection
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: c(person("Lotfi", "Slim", email = "lotfi.slim@mines-paristech.fr", role = c("aut", "cre")),
   person("Clément", "Chatelain", email = "clement.chatelain@sanofi.com", role = "ctb"),
   person("Chloé-Agathe", "Azencott", email = "chloe-agathe.azencott@mines-paristech.fr", role ="ctb"),
@@ -15,7 +15,7 @@ Description: Functions to perform robust epistasis detection in genome-wide
   recover the synergistic effects between the target and the genotype.
 Depends: R (>= 3.4.0)
 Imports: matrixStats, DescTools, glmnet, SNPknock
-Suggests: 
+Suggests:
     foreach,
     iterators,
     precrec,
