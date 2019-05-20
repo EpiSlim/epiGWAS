@@ -280,8 +280,8 @@ fast_HMM <- function(X, out_path = NULL, X_filename = NULL, fp_path = "bin/fastP
   }
 
   # Fitting fastPHASE Hidden Markov Model
-  Xinp_file <- SNPknock::SNPknock.fp.writeX(X, out_file = X_filename)
-  fp_out_path <- SNPknock::SNPknock.fp.runFastPhase(fp_path, Xinp_file,
+  Xinp_file <- SNPknock::writeXtoInp(X, out_file = X_filename)
+  fp_out_path <- SNPknock::runFastPhase(fp_path, Xinp_file,
     K = n_state, numit = n_iter, out_path = out_path
   )
 
@@ -291,9 +291,10 @@ fast_HMM <- function(X, out_path = NULL, X_filename = NULL, fp_path = "bin/fastP
   alpha_file <- paste(fp_out_path, "_alphahat.txt", sep = "")
   char_file <- paste(fp_out_path, "_origchars", sep = "")
 
-  hmm <- SNPknock::SNPknock.fp.loadFit_hmm(
-    r_file, theta_file, alpha_file,
-    char_file
+  hmm <- SNPknock::loadHMM(
+    r_file = r_file, theta_file = theta_file,
+    alpha_file = alpha_file, char_file = char_file,
+    compact = FALSE
   )
 
   return(hmm)
