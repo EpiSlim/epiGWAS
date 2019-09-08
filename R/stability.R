@@ -15,7 +15,6 @@
 #' n_subsample <- 10 # Number of subsamples
 #'
 #' sub_matrix <- subsample(n = n, n_subsample = n_subsample)
-#'
 #' @export
 subsample <- function(n, size = n %/% 2, n_subsample) {
   idx <- array(dim = c(size, n_subsample))
@@ -93,17 +92,19 @@ subsample <- function(n, size = n %/% 2, n_subsample) {
 #' p <- 20
 #' X <- matrix(rnorm(n * p), ncol = p)
 #' Y <- crossprod(t(X), rnorm(p))
-#' aucs_cont <- stabilityGLM(X, Y, family = "gaussian", n_subsample = 1,
-#'                           short = FALSE)
+#' aucs_cont <- stabilityGLM(X, Y,
+#'   family = "gaussian", n_subsample = 1,
+#'   short = FALSE
+#' )
 #'
 #' # ---- Binary data ----
 #' X <- matrix(rnorm(n * p), ncol = p)
-#' Y <- runif(n, min = 0, max = 1) < 1/ (1 + exp(-X[, c(1, 7, 15)] %*% rnorm(3)))
+#' Y <- runif(n, min = 0, max = 1) < 1 / (1 + exp(-X[, c(1, 7, 15)] %*% rnorm(3)))
 #' weights <- runif(n, min = 0.4, max = 0.8)
-#' aucs_binary <- stabilityGLM(X, Y, weights = weights,
-#'                             n_lambda = 50, lambda_min_ratio = 0.05, n_subsample = 1)
-#'
-#'
+#' aucs_binary <- stabilityGLM(X, Y,
+#'   weights = weights,
+#'   n_lambda = 50, lambda_min_ratio = 0.05, n_subsample = 1
+#' )
 #' @seealso \code{\link[glmnet]{glmnet-package}}
 #'
 #' @export
@@ -213,54 +214,58 @@ stabilityGLM <- function(X, Y, weights = rep(1, nrow(X)), family = "gaussian",
 #' p <- 25
 #' X <- bigmemory::as.big.matrix(matrix(runif(n * p), ncol = p))
 #' Y <- runif(n, min = 0, max = 1) < 0.5
-#' aucBIG <- stabilityBIG(X, Y, family = "binomial", short = TRUE,
-#'                        ncores = 1, n_lambda = 200, n_subsample = 1)
-#'
+#' aucBIG <- stabilityBIG(X, Y,
+#'   family = "binomial", short = TRUE,
+#'   ncores = 1, n_lambda = 200, n_subsample = 1
+#' )
 #' @export
 stabilityBIG <- function(X, Y, family = "gaussian", n_subsample = 20, n_lambda = 100,
                          lambda_min_ratio = 0.01, eps = 1e-05, short = TRUE, ncores = 2) {
-  stopifnot(family %in% c("gaussian", "binomial"))
-  stopifnot(bigmemory::is.big.matrix(X))
+  if (requireNamespace("bigmemory", quietly = TRUE) & requireNamespace("biglasso", quietly = TRUE)) {
+    stopifnot(family %in% c("gaussian", "binomial"))
+    stopifnot(bigmemory::is.big.matrix(X))
 
-  requireNamespace("bigmemory", quietly = FALSE)
-  requireNamespace("biglasso", quietly = FALSE)
+    idx <- subsample(length(Y), size = (length(Y) %/% 2), n_subsample = n_subsample)
 
-  idx <- subsample(length(Y), size = (length(Y) %/% 2), n_subsample = n_subsample)
-
-  full_fit <- biglasso::biglasso(
-    X = X, y = Y, penalty = "enet", family = family,
-    nlambda = n_lambda, ncores = ncores, lambda.min = lambda_min_ratio,
-    alpha = 1 - eps, warn = FALSE
-  )
-
-  if (length(full_fit$lambda) < n_lambda) {
     full_fit <- biglasso::biglasso(
       X = X, y = Y, penalty = "enet", family = family,
-      nlambda = n_lambda, ncores = ncores, lambda.min = min(full_fit$lambda) / (0.99 *
-        max(full_fit$lambda)), alpha = 1 - eps, warn = FALSE
-    )
-  }
-
-  length_lambda <- length(full_fit$lambda)
-  stab <- array(0, dim = c(length_lambda, dim(X)[2]))
-
-  for (i in seq_len(n_subsample)) {
-    sub_X_shared <- bigmemory::deepcopy(X, rows = idx[, i], shared = FALSE, type = "double")
-    partial_fit <- biglasso::biglasso(
-      X = sub_X_shared, y = Y[idx[, i]],
-      penalty = "enet", family = family, ncores = ncores, lambda = full_fit$lambda,
+      nlambda = n_lambda, ncores = ncores, lambda.min = lambda_min_ratio,
       alpha = 1 - eps, warn = FALSE
     )
-    if (length(partial_fit$lambda) < length_lambda) {
-      length_lambda <- length(partial_fit$lambda)
+
+    if (length(full_fit$lambda) < n_lambda) {
+      full_fit <- biglasso::biglasso(
+        X = X, y = Y, penalty = "enet", family = family,
+        nlambda = n_lambda, ncores = ncores, lambda.min = min(full_fit$lambda) / (0.99 *
+          max(full_fit$lambda)), alpha = 1 - eps, warn = FALSE
+      )
     }
-    partial_coef <- as.matrix(stats::coef(partial_fit, s = full_fit$lambda)[seq_len(dim(X)[2]) +
-      1, seq_len(length_lambda)])
-    stab <- stab[seq_len(length_lambda), ]
-    stab <- stab + t(partial_coef != 0)
+
+    length_lambda <- length(full_fit$lambda)
+    stab <- array(0, dim = c(length_lambda, dim(X)[2]))
+
+    for (i in seq_len(n_subsample)) {
+      sub_X_shared <- bigmemory::deepcopy(X, rows = idx[, i], shared = FALSE, type = "double")
+      partial_fit <- biglasso::biglasso(
+        X = sub_X_shared, y = Y[idx[, i]],
+        penalty = "enet", family = family, ncores = ncores, lambda = full_fit$lambda,
+        alpha = 1 - eps, warn = FALSE
+      )
+      if (length(partial_fit$lambda) < length_lambda) {
+        length_lambda <- length(partial_fit$lambda)
+      }
+      partial_coef <- as.matrix(stats::coef(partial_fit, s = full_fit$lambda)[seq_len(dim(X)[2]) +
+        1, seq_len(length_lambda)])
+      stab <- stab[seq_len(length_lambda), ]
+      stab <- stab + t(partial_coef != 0)
+    }
   }
 
-  rm(sub_X_shared)
+  if (dir.exists("/tmp/boost_interprocess") & grepl("^darwin", R.version$os)) {
+    unlink("/tmp/boost_interprocess", recursive = TRUE, force = TRUE) # temporary folder created by biglasso
+  }
+
+  remove(sub_X_shared)
   gc()
 
   stab <- stab / n_subsample

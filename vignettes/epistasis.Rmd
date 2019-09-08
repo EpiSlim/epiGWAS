@@ -163,32 +163,32 @@ The last step is to evaluate the epistasis detection performance in terms of the
 ```{r, echo=FALSE}
 labels <- colnames(X) %in% causal$syner # The positives are the SNPs interacting interacting with the target
 
-require("precrec", quietly = TRUE)
-require("knitr", quietly = TRUE)
-require("kableExtra", quietly = TRUE)
+if (requireNamespace("precrec", quietly = TRUE) & requireNamespace("knitr", quietly = TRUE) & requireNamespace("kableExtra", quietly = TRUE)){
+  
+  stability_scores <- precrec::join_scores(stability_scores)
+  format_scores <- precrec::mmdata(
+    scores = stability_scores,
+    labels = labels,
+    modnames = c("OWL", "Modified outcome", "Shifted modified outcome",
+                 "Normalized modified outcome", "Robust modified outcome")
+  )
+  
+  perf_metrics <- precrec::evalmod(format_scores)
+  aucs <- precrec::auc(perf_metrics)
+  
+  PRC <- subset(aucs, curvetypes == "PRC", select = c("modnames", "aucs"))
+  colnames(PRC) <- c("Method", "PRC")
+  rownames(PRC) <- NULL
+  ROC <- subset(aucs, curvetypes == "ROC", select = c("modnames", "aucs"))
+  colnames(ROC) <- c("Method", "ROC")
+  rownames(ROC) <- NULL
+  aucs_table <- merge(x = ROC, y = PRC, by = "Method", all = TRUE)
+  kable_tab <- knitr::kable(aucs_table, caption = "Areas under the ROC and PR curves")
+  kable_tab <- kableExtra::kable_styling(kable_tab, "striped", full_width = FALSE)
+  kableExtra::row_spec(kable_tab, which(aucs_table$Method == "Robust modified outcome"), bold = TRUE, color = "white", background = "#37648d")
+  
+}
 
-stability_scores <- join_scores(stability_scores)
-
-format_scores <- mmdata(
-  scores = stability_scores,
-  labels = labels,
-  modnames = c("OWL", "Modified outcome", "Shifted modified outcome",
-               "Normalized modified outcome", "Robust modified outcome")
-)
-
-perf_metrics <- evalmod(format_scores)
-aucs <- auc(perf_metrics)
-
-PRC <- subset(aucs, curvetypes == "PRC", select = c("modnames", "aucs"))
-colnames(PRC) <- c("Method", "PRC")
-rownames(PRC) <- NULL
-ROC <- subset(aucs, curvetypes == "ROC", select = c("modnames", "aucs"))
-colnames(ROC) <- c("Method", "ROC")
-rownames(ROC) <- NULL
-aucs_table <- merge(x = ROC, y = PRC, by = "Method", all = TRUE)
-kable(aucs_table, caption = "Areas under the ROC and PR curves")  %>%
-  kable_styling("striped", full_width = FALSE) %>%
-  row_spec(which(aucs_table$Method == "Robust modified outcome"), bold = TRUE, color = "white", background = "#37648d")
 ```
 
 The results are perfectly concordant with our findings in [@Slim2018]. Among the five methods, robust modified outcome is obviously the best performer in terms of areas under both the ROC and the PR curves. 
