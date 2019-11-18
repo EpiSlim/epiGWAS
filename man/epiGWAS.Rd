@@ -4,8 +4,16 @@
 \alias{epiGWAS}
 \title{Runs a selection of epistasis detection methods in a joint manner}
 \usage{
-epiGWAS(A, X, Y, propensity, methods = "all", parallel = TRUE,
-  shift = 0.1, ...)
+epiGWAS(
+  A,
+  X,
+  Y,
+  propensity,
+  methods = "all",
+  parallel = TRUE,
+  shift = 0.1,
+  ...
+)
 }
 \arguments{
 \item{A}{target variant}

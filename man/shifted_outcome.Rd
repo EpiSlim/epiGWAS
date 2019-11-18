@@ -4,8 +4,7 @@
 \alias{shifted_outcome}
 \title{Implements the shifted modified outcome approach}
 \usage{
-shifted_outcome(A, X, Y, propensity, parallel = FALSE, shift = 0.1,
-  ...)
+shifted_outcome(A, X, Y, propensity, parallel = FALSE, shift = 0.1, ...)
 }
 \arguments{
 \item{A}{target variant}

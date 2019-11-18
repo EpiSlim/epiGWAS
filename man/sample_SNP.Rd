@@ -4,9 +4,18 @@
 \alias{sample_SNP}
 \title{Samples causal SNPs with different effect types}
 \usage{
-sample_SNP(nX, nY, nZ12, clusters, MAF, thresh_MAF = 0.2,
-  window_size = 3, overlap_marg = 0, overlap_inter = 0,
-  max_iter = 10000)
+sample_SNP(
+  nX,
+  nY,
+  nZ12,
+  clusters,
+  MAF,
+  thresh_MAF = 0.2,
+  window_size = 3,
+  overlap_marg = 0,
+  overlap_inter = 0,
+  max_iter = 10000
+)
 }
 \arguments{
 \item{nX}{number of SNPs interacting with the target variant}

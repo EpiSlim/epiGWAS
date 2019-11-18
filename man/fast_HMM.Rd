@@ -4,8 +4,14 @@
 \alias{fast_HMM}
 \title{Fits a HMM to a genotype dataset by calling fastPHASE}
 \usage{
-fast_HMM(X, out_path = NULL, X_filename = NULL,
-  fp_path = "bin/fastPHASE", n_state = 12, n_iter = 25)
+fast_HMM(
+  X,
+  out_path = NULL,
+  X_filename = NULL,
+  fp_path = "bin/fastPHASE",
+  n_state = 12,
+  n_iter = 25
+)
 }
 \arguments{
 \item{X}{genotype matrix}

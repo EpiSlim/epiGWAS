@@ -4,9 +4,17 @@
 \alias{stabilityBIG}
 \title{Computes the area under the stability path for all covariates}
 \usage{
-stabilityBIG(X, Y, family = "gaussian", n_subsample = 20,
-  n_lambda = 100, lambda_min_ratio = 0.01, eps = 1e-05,
-  short = TRUE, ncores = 2)
+stabilityBIG(
+  X,
+  Y,
+  family = "gaussian",
+  n_subsample = 20,
+  n_lambda = 100,
+  lambda_min_ratio = 0.01,
+  eps = 1e-05,
+  short = TRUE,
+  ncores = 2
+)
 }
 \arguments{
 \item{X}{design matrix formatted as a
@@ -73,6 +81,7 @@ Selection. BMC Systems Biology, 6.
 \seealso{
 \code{\link[biglasso]{biglasso-package}}
 
-Other support estimation functions: \code{\link{stabilityGLM}}
+Other support estimation functions: 
+\code{\link{stabilityGLM}()}
 }
 \concept{support estimation functions}

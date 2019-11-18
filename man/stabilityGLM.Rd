@@ -4,9 +4,17 @@
 \alias{stabilityGLM}
 \title{Computes the area under the stability path for all covariates}
 \usage{
-stabilityGLM(X, Y, weights = rep(1, nrow(X)), family = "gaussian",
-  n_subsample = 20, n_lambda = 100, short = TRUE,
-  lambda_min_ratio = 0.01, eps = 1e-05)
+stabilityGLM(
+  X,
+  Y,
+  weights = rep(1, nrow(X)),
+  family = "gaussian",
+  n_subsample = 20,
+  n_lambda = 100,
+  short = TRUE,
+  lambda_min_ratio = 0.01,
+  eps = 1e-05
+)
 }
 \arguments{
 \item{X}{input design matrix}
@@ -101,6 +109,7 @@ Selection. BMC Systems Biology, 6.
 \seealso{
 \code{\link[glmnet]{glmnet-package}}
 
-Other support estimation functions: \code{\link{stabilityBIG}}
+Other support estimation functions: 
+\code{\link{stabilityBIG}()}
 }
 \concept{support estimation functions}
